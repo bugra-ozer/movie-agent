@@ -1,17 +1,17 @@
+{
+    "previous_data":
     {
-        "previous_data":
-            {
-                "path": "data/previous_data.parquet",
-                "fallback": ["IMDBid", "Date"]
-            },
-        "bayesian_data":
-            {
-                "path": "data/bayesian_data.parquet",
-                "fallback": ["IMDBid", "Date", "Bayes Score", "Decay Factor", "Adjusted Score"]
-            },
-        "main_data":
-            {
-                "path": "data/main_data.parquet",
-                "fallback": []
-            }
+        "path": "data/previous_data.parquet",
+        "fallback": ["IMDBid", "Date"]
+    },
+    "bayesian_data":
+    {
+        "path": "data/bayesian_data.parquet",
+        "fallback": ["IMDBid", "Date", "Bayes Score", "Decay Factor", "Adjusted Score"]
+    },
+    "main_data":
+    {
+        "path": "data/main_data.parquet",
+        "fallback": []
     }
+}

@@ -1,9 +1,8 @@
-import random
 import pandas as pd
 import pathlib as pl
 import pdb
-from ui.user_interface import UserInterface
 import time
+from ui.user_interface import UserInterface
 from networking import handle_datasets as hd
 
 class MovieAgent():
@@ -67,19 +66,18 @@ class MovieAgentBuilder():
 
 class DataLoader():
 
-    def __init__(self, data_frame, path):
+    def __init__(self, data_frame:pd.DataFrame, path):
         self.data=None
-        self.raw_data=None
-        self.data_frame = data_frame
-        self.preprocessed_path = path
+        self.raw_data=data_frame
+        self.data_frame=data_frame
+        self.preprocessed_path=path
         self.main()
 
     def main(self):
-        self.data=self.run_operations(self.data_frame)
-        self.raw_data=self._copy_raw_data(self.data_frame)
+        self.data=self._run_operations(self.data_frame)
         return self
 
-    def run_operations(self):
+    def _run_operations(self):
         start = time.time()
         if pl.Path.exists(self.preprocessed_path):
             self.data_frame = pd.read_parquet(self.preprocessed_path)
@@ -89,7 +87,7 @@ class DataLoader():
             title_basics_df = self.read_tsv_file(str(title_basics))
             title_imr_df = self.read_tsv_file(str(title_imr))
             self.data_frame = self.merge_dataframes(title_imr_df, title_basics_df)  # insert df to be merged
-            self.data_frame = self._purge_data(self.data_frame)  # retain data quality
+            self.data_frame = self._purge_data()  # retain data quality
             self.data_frame.to_parquet(self.preprocessed_path)
         print(f"Operation runtime: {time.time() - start}")
         return self
@@ -113,22 +111,17 @@ class DataLoader():
             raise IOError(f"Failed to read CSV: {e}") from e
         return read_tsv
 
-    def _copy_raw_data(self, movie_agent: MovieAgent):
-        """Copies the raw data of movieAgent object's df"""
-        self.raw_data = movie_agent.data
-        return self.raw_data
-
     def _filter_rows(self, column:str, mask):
         """Remove unwanted records internally."""
         data:pd.DataFrame
         data=self.data[self.data[column]==mask]
         return data
 
-    def _purge_data(self, data_frame:pd.DataFrame) -> pd.DataFrame:
+    def _purge_data(self):
         """Remove excessive items with low votes, empty primary titles and genres."""
-        data_frame = self._filter_rows('titleType', 'movie')  # remove anything else than movie in records
-        data_frame = data_frame[(data_frame['primaryTitle'].notna()) & (data_frame['genres'].notna()) & (data_frame['numVotes'] > 5000)]  # Purge unsuitable titles
-        return data_frame
+        self.data_frame = self._filter_rows('titleType', 'movie')  # remove anything else than movie in records
+        self.data_frame = self.data_frame[(self.data_frame['primaryTitle'].notna()) & (self.data_frame['genres'].notna()) & (self.data_frame['numVotes'] > 5000)]  # Purge unsuitable titles
+        return self
 
 class MovieFilter:
     """Class that internally selects and stores selected movies after user filter is applied.\n
@@ -137,7 +130,6 @@ class MovieFilter:
     def __init__(self, movie_agent_builder:MovieAgentBuilder, filter_tools:list[list[str]]):
         """Requires movieAgentBuilder object to initialize
         filter_tools: column_name, operatr, value to be filtered"""
-        self.randomizer=random.Random()
         self.df=movie_agent_builder.movie_agent.data.copy()
         self.raw_data=movie_agent_builder.raw_data.copy()
         self.condition = None
@@ -198,7 +190,7 @@ class MovieFilter:
         return candidates
     
     def _store_condition(self, condition:pd.Series):
-        """Store condition property for filterization"""
+        """Store condition property for filtering"""
         if condition is None:
             self.condition=None
         else:

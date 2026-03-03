@@ -1,0 +1,7 @@
+{
+  "preprocessed_data":
+  {
+    "dir": "data/",
+    "filename": "preprocessed_data.parquet"
+  }
+}

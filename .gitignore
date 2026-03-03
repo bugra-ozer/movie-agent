@@ -3,9 +3,6 @@
 __pycache__/
 *.pyc
 
-# Bayesian code should not be on main
-core/bayesian_algorithm.py
-
 # Local data files
 data/*.parquet
 data/*.tsv
