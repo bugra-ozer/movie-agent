@@ -3,14 +3,18 @@
   {
       "name": "ratings",
       "url": "https://datasets.imdbws.com/title.ratings.tsv.gz",
-      "filename": "imdb.title.ratings.tsv",
-      "path": "data/imdb.title.ratings.tsv"
+      "filename": "imdb.title.ratings.tsv.gz",
+      "dec_filename": "imdb.title.ratings.tsv",
+      "path": "data/imdb.title.ratings.tsv",
+      "folder": "data/"
   },
   "imdb.title.basics_data":
   {
       "name": "basics",
       "url": "https://datasets.imdbws.com/title.basics.tsv.gz",
-      "filename": "imdb.title.basics.tsv",
-      "path": "data/imdb.title.basics.tsv"
+      "filename": "imdb.title.basics.tsv.gz",
+      "dec_filename": "imdb.title.basics.tsv",
+      "path": "data/imdb.title.basics.tsv",
+      "folder": "data/"
   }
 }
