@@ -94,7 +94,7 @@ class MoviePicker():
         return decay_factor
 
 class MovieFileOperator():
-    """Class that handles file operations for orchestrator class."""
+    """Class that handles file operations for orchestrator class for caching."""
     def __init__(self, json_cfg:str="file_operations.json"):
         """"""
         self.concat=None

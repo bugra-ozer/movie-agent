@@ -4,7 +4,7 @@ import json
 import pdb
 import time
 from ui.user_interface import UserInterface
-from networking import handle_datasets as hd
+from networking import handle_datasets as nw
 
 class MovieAgent():
     """Container class for managing the state of the dataframe"""
@@ -17,8 +17,7 @@ class MovieAgent():
 
     def build_agent(self):
         """Orchestrates the flow of code for easy readability."""
-        self.data = self.data_pipeline.main()
-        print(self.data.columns)
+        self.data=self.data_pipeline.main()
         self._purge_data()
         self.mutate_dataframe()
     
@@ -80,12 +79,19 @@ class DataPipeline():
         self.preprocessed_path=None
         self.tsv_path=[]
         self.data_loader=DataLoader()
+        self.dataset_downloader=nw.DatasetDownloader()
 
     def main(self):
         """"""
         self._load_config()
         self._fetch_paths()
         self._convert_config_pl()
+        if self.preprocessed_path is None:
+            raise Exception('Failed to load preprocessed data')
+        elif not self.tsv_path:
+            raise Exception('Failed to load tsv paths')
+        if any(path for path in [self.preprocessed_path, *self.tsv_path] if not pl.Path(path).exists()): #if file paths are empty orchestrate http request
+            self.dataset_downloader.main()
         return self.build_data()
 
     def _load_config(self):
@@ -122,11 +128,13 @@ class DataPipeline():
         """Read if processed file exists, else run operations to initiate one."""
         data_frames=[]
         if pl.Path.exists(self.preprocessed_path):
+            print('loading preprocessed file...')
             data=self.data_loader.read_file(str(self.preprocessed_path), 'parquet')
         else:
             for path in self.tsv_path:
+                print('loading tsv file...')
                 data_frames.append(self.data_loader.read_file(str(path), 'tsv'))
-            data=self.data_loader.merge_dataframes(*data_frames, on='IMDBid')
+            data=self.data_loader.merge_dataframes(*data_frames, on='tconst')
             self.data_loader.save_file(data, self.preprocessed_path)
         return data
 

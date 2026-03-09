@@ -44,7 +44,7 @@ class DatasetDownloader():
             with gzip.open(source, "rb") as f_in, open(destination, "wb") as f_out:
                 for chunk in tqdm(iter(lambda: f_in.read(1000000), b""), unit='B', unit_scale=True, bar_format='\033[37m{l_bar}\033[32m{bar}\033[37m{r_bar}', ncols=120, desc=f'decompressing dataset {self.file}'): #1 MB packets
                     f_out.write(chunk)
-                self._delete_compressed_file(source)
+            self._delete_compressed_file(source)
         else:
             raise Exception(f'Decompression failed. {source} not found.')
 
