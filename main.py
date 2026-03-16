@@ -22,6 +22,7 @@ class MovieAgent():
     def build_agent(self):
         """Orchestrates the flow of code for easy readability."""
         self.data=self.data_pipeline.main()
+        self.raw_data=self.data #set raw dataframe before clearing main dataframe
         self._purge_data()
         self.mutate_dataframe()
     
@@ -197,22 +198,20 @@ class MovieFilter:
     """Class that internally selects and stores selected movies after user filter is applied.\n
     Carries MovieAgent dataframe and MovieAgentBuilder raw_data internally"""
 
-    def __init__(self, movie_agent:MovieAgent, filter_tools:list[list[str]]):
+    def __init__(self, df:pd.DataFrame, filter_tools:list[list[str]], raw_data:pd.DataFrame):
         """Requires movieAgentBuilder object to initialize
         filter_tools: column_name, operatr, value to be filtered"""
-        self.df=movie_agent.data.copy()
-        self.raw_data=movie_agent.raw_data.copy()
+        self.df=df.copy()
+        self.raw_data=raw_data.copy()
         self.condition = None
         self.sort_column = None
         self.sort_ascending = True
-        self.user=None
         self.genres=self.df['Genre'].str.lower().str.split(',').explode().unique()
         self.column_map={col.lower(): col for col in self.df.columns}
         self.candidates=self.get_movies(filter_tools)
 
     def get_movies(self, filter_tools:list[list[str]]):
         """Retrieve list of movies with user filter applied.\n
-        n: number of movie recommendation\n
         filter_tools: Filter params: column_name, operator, value such as: Average Rating, >, 7
         """
         #Check if column_name, operatr, value valid in dataframe

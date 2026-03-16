@@ -1,15 +1,20 @@
 import string
 import asyncio
 import logging
+import enum
 
 logger = logging.getLogger(__name__)
+
+class SearchTypes(enum.Enum):
+    RATING = 'rating'
+    GENRE = 'genre'
+    BOTH = 'both'
 
 class UserInterface():
     """Class that provides interface for user-based actions."""
 
     def __init__(self): #type: ignore
-        self.delimiter="|"
-        self.all_filter_tools:list[list[str]]=self.start()
+        self.all_filter_tools:list[list[str]]=[]
 
     def start(self):
         """Initialize the program"""
@@ -18,18 +23,62 @@ class UserInterface():
         while flag:
             user_input=self._return_input()
             if self._is_exit(user_input): break
-            elif self._is_input_help(user_input): self.display_help(True)
+            elif self._is_input_help(user_input): self.display_help(user_input)
             else:
                 flag=False
-                #Check if it is valid filter
-                filter_tools=self._parse_all_filters(user_input)
+                self._prompt_search()
         return filter_tools
 
     @staticmethod
     def _return_input():
         """Print user for valid options and return input"""
-        return input('\033cWelcome to movie agent!\n\nYour options: \n\t-search movie\n\t-press enter to skip this step \n\t-type -help to open instructions menu.\n')
-        
+        return input('\033cWelcome to movie agent!\n\nYour options: \n\t-press enter to search \n\t-type -help to open instructions menu \n\t-type "exit" to leave')
+
+    def _prompt_search(self):
+        """Prompt user for search options and return input"""
+        flag=True
+        while flag:
+            user_search = input('Options to search for movies: -rating search\n\t-genre search\n\t-both\n\t-enter "exit" to leave search')
+            if self._is_exit(user_search):
+                break
+            try:
+                search_type=SearchTypes(user_search)
+                match search_type:
+                    case SearchTypes.RATING:
+                        self._rating_search()
+                    case SearchTypes.GENRE:
+                        self._genre_search()
+                    case SearchTypes.BOTH:
+                        self._rating_search()
+                        self._genre_search()
+                break
+            except ValueError:
+                print('Please enter a valid rating value or type "exit" to leave the search.')
+
+    def _rating_search(self, user_input:str):
+        """Prompt user for search options and return input"""
+        search = input('Enter a minimum rating value 1-10.')
+        if self._is_exit(search):
+            pass
+        try:
+            search = float(search)
+            if 1 <= search <= 10:
+                self.all_filter_tools.append(['Average Rating','>', {search}])
+        except ValueError:
+            print('Please enter a valid rating value or type "exit" to leave the search.')
+
+    def _genre_search(self, user_input:str):
+        """Prompt user for search options and return input"""
+        search = input('Enter a type of genre. To list genres, type "all"')
+        if self._is_exit(search):pass
+        if self.display_help():pass
+        try:
+            search = float(search)
+            if 1 <= search <= 10:
+                return f'Average Rating, >, {search}'
+        except ValueError:
+            print('Please enter a valid rating value or type "exit" to leave the search.')
+
     @staticmethod
     def _is_exit(user_input:str):
         """Check if user is given exit command to interface, if so return true."""
@@ -39,82 +88,34 @@ class UserInterface():
         else:
             flag=False
         return flag
-
-    def _parse_all_filters(self, user_input:str):
-        """Filter parsing for more than one filters with given delimiter."""
-        user_input=self._split_by_delimiter(user_input)
-        parsed_filters=[]
-        for filters in user_input:
-            parsed_filters.append(self._parse_filter(filters))
-        return parsed_filters
-
-    def _split_by_delimiter(self, user_input:str):
-        """Attempt to parse user text by delimiter."""
-        self.delimiter=self._get_delimiter()
-        return self._parse_delimiter(self.delimiter, user_input)
-
-    def _get_delimiter(self):
-        """Ask user for delimiter argument"""
-        user_delimiter=input(f'''\033cOptional: input your one char delimiter or press enter to keep it as: {self.delimiter}, type /help to get more information\n''')
-        if user_delimiter in [""," "]:
-            pass
-        elif user_delimiter in string.punctuation.replace(',', ''):self.delimiter=user_delimiter
-        else:
-            logger.info('Delimiter configuration failed. Set up as default. ("|")')
-        return self.delimiter
-
-    @staticmethod
-    def _parse_delimiter(delimiter:str, user_input:str):
-        """Apply delimiter to multiple filters, if there is only one filter ignore."""
-        filtered_input=user_input.strip().lower().split(delimiter)
-        filtered_input=[value.strip() for value in filtered_input]
-        return filtered_input
-
-    @staticmethod
-    def _parse_filter(user_input:str):
-        """Parse user raw text by commas without validation."""
-        filtered_input=user_input.strip().lower().split(',')
-        filtered_input=[value.strip() for value in filtered_input]
-        if 4 > len(filtered_input) > 0:
-            return filtered_input
-        else:
-            raise ValueError
         
     @staticmethod
     def _is_input_help(user_input:str):
         """Return boolean based on user input."""
-        if user_input in ['delimiter', 'search', 'filter', 'help', '-help']:
+        if user_input in ['genre', 'search', 'filter', 'help', '-help']:
             return True
         else:
             return False
 
-    def display_help(self, flag:bool):
+    def display_help(self, user_input:str):
         """Print help instructions based on user request."""
-        user_text=input('You opened instructions/help menu. Choose options and press enter to see intructions. \nOptions:\n\tsearch\n\tdelimiter\n\tfilter\n\tquit\n')
-
+        options='\nOptions:\n\tsearch\n\tgenre\n\tfilter\n\tquit\n'
+        flag=True
         while flag:
-            
-            if user_text in 'delimiter':
-                logger.info(f'''\033cA delimiter is your splitting method for multiple filtering in one input. The default is assigned to '|'\n' \
-                'A delimiter allows program to recognize seperate filters in one line such as:\n' \
-                '"Average Rating, >, 5 | Number of Votes, >, 10000" If you do set delimiter a special case, it needs to be valid. (Any in: {string.punctuation.replace(',','')})\n
-                There is no logical reason more than self preference to changing the delimiter.
-                
-                WARNING: comma is NOT valid delimiter as it is used for different case.''')
-                user_text=input('\nOptions:\n\tsearch\n\tdelimiter\n\tfilter\n\tquit\n')
+            if user_input in 'genre':
+                logger.info(f'''\033Genres: Action\nAdventure\nAnimation\nBiography\nComedy\nCrime\nDocumentary\nDrama\nFamily\nFantasy\nFilm-Noir\nGame-Show\nHistory\nHorror\nMusic\nMusical\nMystery\nNews\nReality-TV\nRomance\nSci-Fi\nShort\nSport\nTalk-Show\nThriller\nWar\nWestern''')
+                user_input=input(options)
 
-            elif user_text in 'search':
+            elif user_input in 'search':
                 logger.info(f'''\033cTo search for a movie, enter values such as: Average Rating, >, 5 or if looking for titles or genres, try typing and entering: Shawshank Redemption or Horror\n''')
-                user_text=input('\nOptions:\n\tsearch\n\tdelimiter\n\tfilter\n\tquit\n')
+                user_input=input(options)
 
-            elif user_text in 'filter':
-                logger.info(f'''\033cTo apply more than one filter, seperate the filters by {self.delimiter}''')
-                user_text=input('\nOptions:\n\tsearch\n\tdelimiter\n\tfilter\n\tquit\n')
+            elif user_input in 'filter':
+                logger.info(f'''\033cTo apply more than one filter, separate the filters by {self.delimiter}''')
+                user_input=input(options)
 
-            elif self._is_exit(user_text):
+            elif self._is_exit(user_input):
                 flag=False
-
-            else: flag=False
 
 if __name__ == "__main__":
     
