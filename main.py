@@ -2,8 +2,8 @@ import pandas as pd
 import pathlib as pl
 import json
 import logging
-from ui import user_interface as ui
-from networking import handle_datasets as nw
+from ui import cli as ui
+from networking import client as client
 from scorer import bayesian_algorithm as bayes
 from logs import log_handler
 
@@ -84,7 +84,7 @@ class DataPipeline():
         self.preprocessed_path=None
         self.tsv_path=[]
         self.data_loader=DataLoader()
-        self.dataset_downloader=nw.DatasetDownloader()
+        self.dataset_downloader=client.DatasetDownloader()
 
     def main(self):
         """"""
