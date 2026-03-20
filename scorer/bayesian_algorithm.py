@@ -1,4 +1,4 @@
-from test_data import data as data
+from .test_data import data as data
 import pandas as pd
 import datetime
 import logging

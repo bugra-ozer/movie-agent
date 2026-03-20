@@ -1,3 +1,4 @@
+import os
 import string
 import asyncio
 import logging
@@ -15,9 +16,10 @@ class UserInterface():
 
     def __init__(self): #type: ignore
         self.all_filter_tools:list[list[str]]=[]
+        self.start()
 
     def start(self):
-        """Initialize the program"""
+        """Prompt user for actions"""
         flag=True
         filter_tools=None
         while flag:
@@ -29,20 +31,15 @@ class UserInterface():
                 self._prompt_search()
         return filter_tools
 
-    @staticmethod
-    def _return_input():
-        """Print user for valid options and return input"""
-        return input('\033cWelcome to movie agent!\n\nYour options: \n\t-press enter to search \n\t-type -help to open instructions menu \n\t-type "exit" to leave')
-
     def _prompt_search(self):
-        """Prompt user for search options and return input"""
+        """Prompt user for search options and guide the user for search."""
         flag=True
         while flag:
-            user_search = input('Options to search for movies: -rating search\n\t-genre search\n\t-both\n\t-enter "exit" to leave search')
-            if self._is_exit(user_search):
+            user_input = input('\033c \nOptions to search for movies: \n\t-rating\n\t-genre\n\t-both\n\t-enter "exit" to leave search\n\t')
+            if self._is_exit(user_input):
                 break
             try:
-                search_type=SearchTypes(user_search)
+                search_type=SearchTypes(user_input)
                 match search_type:
                     case SearchTypes.RATING:
                         self._rating_search()
@@ -53,31 +50,30 @@ class UserInterface():
                         self._genre_search()
                 break
             except ValueError:
-                print('Please enter a valid rating value or type "exit" to leave the search.')
+                print('Please enter a valid search type or type "exit" to leave the search.')
 
-    def _rating_search(self, user_input:str):
+    def _rating_search(self):
         """Prompt user for search options and return input"""
-        search = input('Enter a minimum rating value 1-10.')
-        if self._is_exit(search):
-            pass
-        try:
-            search = float(search)
-            if 1 <= search <= 10:
-                self.all_filter_tools.append(['Average Rating','>', {search}])
-        except ValueError:
-            print('Please enter a valid rating value or type "exit" to leave the search.')
-
-    def _genre_search(self, user_input:str):
-        """Prompt user for search options and return input"""
-        search = input('Enter a type of genre. To list genres, type "all"')
+        search = input('\033c \nEnter a minimum rating value 1-10.\n\t')
         if self._is_exit(search):pass
-        if self.display_help():pass
-        try:
-            search = float(search)
-            if 1 <= search <= 10:
-                return f'Average Rating, >, {search}'
-        except ValueError:
-            print('Please enter a valid rating value or type "exit" to leave the search.')
+        else:
+            try:
+                search = float(search)
+                if 1 <= search <= 10:
+                    self.all_filter_tools.append(['Average Rating','>', {search}])
+                else:
+                    raise ValueError
+            except ValueError:
+                print('Please enter a valid rating value or type "exit" to leave the search.')
+                raise ValueError
+
+    def _genre_search(self):
+        """Prompt user for search options and return input"""
+        search = input('\033c \nEnter a type of genre. To list genres, type "genre"\n\t')
+        if self._is_exit(search):pass
+        else:
+            if self._is_input_help(search):self.display_help(search)
+            self.all_filter_tools.append(['Genre',search])
 
     @staticmethod
     def _is_exit(user_input:str):
@@ -111,14 +107,17 @@ class UserInterface():
                 user_input=input(options)
 
             elif user_input in 'filter':
-                logger.info(f'''\033cTo apply more than one filter, separate the filters by {self.delimiter}''')
+                logger.info(f'''\033cTo apply more than one filter, separate the filters by ''')
                 user_input=input(options)
 
             elif self._is_exit(user_input):
                 flag=False
 
+    @staticmethod
+    def _return_input():
+        """Print user for valid options and return input"""
+        return input('\033c \t\t\t\t\t\t\tWelcome to movie agent!\n\nYour options: \n\t-press enter to search \n\t-type -help to open instructions menu \n\t-type "exit" to leave\n\t')
+
 if __name__ == "__main__":
-    
-    '''
-    NOTE:
-    '''
+    """"""
+    ui=UserInterface()
