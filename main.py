@@ -81,7 +81,7 @@ class DataPipeline():
         self.config_dir='config'
         self.json_cfg=json_cfg
         self.config_dict={}
-        self.preprocessed_path=None
+        self.base_data_path=None
         self.tsv_path=[]
         self.data_loader=DataLoader()
         self.dataset_downloader=client.DatasetDownloader()
@@ -91,12 +91,13 @@ class DataPipeline():
         self._load_config()
         self._fetch_paths()
         self._convert_config_pl()
-        if self.preprocessed_path is None:
-            raise Exception('Failed to load preprocessed data')
+        if self.base_data_path is None:
+            raise Exception('Failed to load base data')
         elif not self.tsv_path:
             raise Exception('Failed to load tsv paths')
-        if any(path for path in [self.preprocessed_path, *self.tsv_path] if not pl.Path(path).exists()): #if file paths are empty orchestrate http request
-            self.dataset_downloader.main()
+        if not pl.Path(self.base_data_path).exists(): #check for base_data, if it exists skip all download dataset operation.
+            if any(path for path in [*self.tsv_path] if not pl.Path(path).exists()): #if file paths are empty orchestrate http request.
+                self.dataset_downloader.main()
         return self.build_data()
 
     def _load_config(self):
@@ -121,10 +122,10 @@ class DataPipeline():
                     raise ValueError(f'Failed to find path for {key}')
 
     def _fetch_paths(self):
-        """Fetch tsv file and preprocessed file paths"""
+        """Fetch tsv file and base file paths"""
         for key, value in self.config_dict.items():
-            if 'preprocessed' in str(key):
-                self.preprocessed_path = value['path']
+            if 'base' in str(key):
+                self.base_data_path = value['path']
             if 'imdb' in str(key):
                 self.tsv_path.append(value['path'])
         return self
@@ -132,15 +133,15 @@ class DataPipeline():
     def build_data(self):
         """Read if processed file exists, else run operations to initiate one."""
         data_frames=[]
-        if pl.Path.exists(self.preprocessed_path):
-            logger.info('loading preprocessed file...')
-            data=self.data_loader.read_file(str(self.preprocessed_path), 'parquet')
+        if pl.Path.exists(self.base_data_path):
+            logger.info('loading base data file...')
+            data=self.data_loader.read_file(str(self.base_data_path), 'parquet')
         else:
             for path in self.tsv_path:
                 logger.info('loading tsv file...')
                 data_frames.append(self.data_loader.read_file(str(path), 'tsv'))
             data=self.data_loader.merge_dataframes(*data_frames, on='tconst')
-            self.data_loader.save_file(data, self.preprocessed_path)
+            self.data_loader.save_file(data, self.base_data_path)
         logger.info('file load complete!')
         return data
 
@@ -329,16 +330,16 @@ class AppManager():
     
     def __init__(self):
         try:
-            self.agent = MovieAgent()
-            #self.CLI=ui.UserInterface() #Expects prompts like Average Rating>5 or Shawshank Redemption
+            self.agent=MovieAgent()
+            self.cli=ui.UserInterface()
             self._main()
         except Exception as e: # noqa
             logger.exception(f'Unhandled exception.')
-        
+
     def _main(self):
         """"""
         self.agent.build_agent()
-        #self.filter_tools:list[list[str]]=self.CLI.all_filter_tools
+        #self.filter_tools:list[list[str]]=self.cli.all_filter_tools
         #self.advice=MovieFilter(self.builder, self.filter_tools)
 
 if __name__ == '__main__':

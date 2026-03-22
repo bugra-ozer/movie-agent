@@ -8,10 +8,5 @@
     {
         "path": "data/bayesian_data.parquet",
         "fallback": ["IMDBid", "Date", "Bayes Score", "Decay Factor", "Adjusted Score"]
-    },
-    "main_data":
-    {
-        "path": "data/main_data.parquet",
-        "fallback": []
     }
 }

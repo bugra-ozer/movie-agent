@@ -1,7 +1,7 @@
 {
-    "preprocessed_data":
+    "base_data":
     {
-        "path": "data/preprocessed_data.parquet",
-        "filename": "preprocessed_data.parquet"
+        "path": "data/base_data.parquet",
+        "filename": "base_data.parquet"
     }
 }
