@@ -107,13 +107,13 @@ class MovieFileOperator():
         self.config_dict:dict=self._load_config()
         self.path=None
 
-    def save_all_file(self):
+    def save_all_files(self):
         """Process saving all files."""
         for file in self.data_store:
             self._save_file(file)
         return self
 
-    def load_all_file(self):
+    def load_all_files(self):
         """Load and clear duplicates from all saved files."""
         self._load_memory()
         self._clear_memory_dupli()
@@ -166,7 +166,7 @@ class MovieFileOperator():
     def _load_config(self):
         """Load configuration file for file operations."""
         try:
-            with open(pl.Path(__file__).parent/self.config_dir/self.json_cfg, "r") as f:
+            with open(pl.Path(__file__).parent.parent/self.config_dir/self.json_cfg, "r") as f:
                 config_dict=json.load(f)
         except ValueError:
             raise Exception('Failed to open .json config.')
@@ -183,9 +183,9 @@ if __name__ == '__main__':
 
     candidates_df=pd.DataFrame(data)
     file_op=MovieFileOperator()
-    file_op.load_all_file()
+    file_op.load_all_files()
     previous_ids=set(file_op.data_store.get('previous_data', pd.DataFrame()).get('IMDBid', []))
     movie_picker=MoviePicker(candidates_df, previous_ids)
     movie_picker.recommend()
     file_op.concat_file({'previous_data': pd.DataFrame(movie_picker.picks), 'bayesian_data': movie_picker.data})
-    file_op.save_all_file()
+    file_op.save_all_files()

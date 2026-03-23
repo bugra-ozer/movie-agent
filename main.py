@@ -6,6 +6,7 @@ from ui import cli as ui
 from networking import client as client
 from scorer import bayesian_algorithm as bayes
 from logs import log_handler
+from cons import constansts
 
 log_handler.LogHandler()
 logger=logging.getLogger(__name__)
@@ -138,7 +139,7 @@ class DataPipeline():
             data=self.data_loader.read_file(str(self.base_data_path), 'parquet')
         else:
             for path in self.tsv_path:
-                logger.info('loading tsv file...')
+                logger.info('merging tsv file(s)...')
                 data_frames.append(self.data_loader.read_file(str(path), 'tsv'))
             data=self.data_loader.merge_dataframes(*data_frames, on='tconst')
             self.data_loader.save_file(data, self.base_data_path)
@@ -195,7 +196,7 @@ class DataLoader():
             raise IOError(f"Failed to save file: {e}") from e
         return self
 
-class MovieFilter:
+class MovieFilter():
     """Class that internally selects and stores selected movies after user filter is applied.\n
     Carries MovieAgent dataframe and MovieAgentBuilder raw_data internally"""
 
@@ -330,6 +331,8 @@ class AppManager():
     
     def __init__(self):
         try:
+            self.file_operator=bayes.MovieFileOperator() #For bayesian calculations and caching
+            self.file_operator.load_all_files()
             self.agent=MovieAgent()
             self.cli=ui.UserInterface()
             self._main()
@@ -339,8 +342,14 @@ class AppManager():
     def _main(self):
         """"""
         self.agent.build_agent()
-        #self.filter_tools:list[list[str]]=self.cli.all_filter_tools
-        #self.advice=MovieFilter(self.builder, self.filter_tools)
+        previous_ids=set(self.file_operator.data_store.get(constansts.PREVIOUS_DATA_KEY, pd.DataFrame()).get(constansts.IMDB_ID_COLUMN, []))
+        self.cli.start()
+        self.filter_tools:list[list[str]]=self.cli.all_filter_tools
+        candidates=MovieFilter(self.agent.data, self.filter_tools, self.agent.raw_data).candidates
+        self.bayes=bayes.MoviePicker(candidates, previous_ids)
+        self.bayes.recommend()
+        self.file_operator.concat_file({constansts.PREVIOUS_DATA_KEY: pd.DataFrame(self.bayes.picks), constansts.BAYESIAN_DATA_KEY: self.bayes.data})
+        self.file_operator.save_all_files()
 
 if __name__ == '__main__':
     AppManager()

@@ -16,7 +16,6 @@ class UserInterface():
 
     def __init__(self): #type: ignore
         self.all_filter_tools:list[list[str]]=[]
-        self.start()
 
     def start(self):
         """Prompt user for actions"""

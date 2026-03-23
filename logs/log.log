@@ -1,53 +1,39 @@
-2026-03-10 11:47:06,633 - __main__ - INFO - loading preprocessed file...
-2026-03-10 11:47:06,744 - __main__ - INFO - file load complete!
-2026-03-10 11:47:13,004 - __main__ - INFO - loading preprocessed file...
-2026-03-10 11:47:13,109 - __main__ - INFO - file load complete!
-2026-03-18 10:34:26,319 - __main__ - INFO - loading preprocessed file...
-2026-03-18 10:34:26,432 - __main__ - INFO - file load complete!
-2026-03-18 10:34:33,721 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): datasets.imdbws.com:443
-2026-03-18 10:34:33,953 - urllib3.connectionpool - DEBUG - https://datasets.imdbws.com:443 "GET /title.ratings.tsv.gz HTTP/1.1" 200 8331807
-2026-03-18 10:34:34,223 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): datasets.imdbws.com:443
-2026-03-18 10:34:34,426 - urllib3.connectionpool - DEBUG - https://datasets.imdbws.com:443 "GET /title.basics.tsv.gz HTTP/1.1" 200 219047099
-2026-03-18 10:34:41,239 - __main__ - INFO - loading tsv file...
-2026-03-18 10:34:41,860 - __main__ - INFO - loading tsv file...
-2026-03-18 10:35:02,517 - __main__ - INFO - file load complete!
-2026-03-18 10:35:07,773 - __main__ - INFO - loading preprocessed file...
-2026-03-18 10:35:07,883 - __main__ - INFO - file load complete!
-2026-03-18 10:35:22,784 - __main__ - INFO - loading preprocessed file...
-2026-03-18 10:35:22,898 - __main__ - INFO - file load complete!
-2026-03-18 10:35:25,036 - __main__ - INFO - loading preprocessed file...
-2026-03-18 10:35:25,139 - __main__ - INFO - file load complete!
-2026-03-20 10:30:01,225 - __main__ - INFO - loading preprocessed file...
-2026-03-20 10:30:01,617 - __main__ - INFO - file load complete!
-2026-03-20 10:30:30,886 - __main__ - INFO - loading preprocessed file...
-2026-03-20 10:30:30,986 - __main__ - INFO - file load complete!
-2026-03-20 10:32:14,308 - __main__ - INFO - loading preprocessed file...
-2026-03-20 10:32:14,424 - __main__ - INFO - file load complete!
-2026-03-22 13:10:07,302 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): datasets.imdbws.com:443
-2026-03-22 13:10:07,567 - urllib3.connectionpool - DEBUG - https://datasets.imdbws.com:443 "GET /title.ratings.tsv.gz HTTP/1.1" 200 8339586
-2026-03-22 13:10:07,833 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): datasets.imdbws.com:443
-2026-03-22 13:10:08,048 - urllib3.connectionpool - DEBUG - https://datasets.imdbws.com:443 "GET /title.basics.tsv.gz HTTP/1.1" 200 219256616
-2026-03-22 13:10:14,815 - __main__ - INFO - loading tsv file...
-2026-03-22 13:10:15,446 - __main__ - INFO - loading tsv file...
-2026-03-22 13:10:38,669 - __main__ - INFO - file load complete!
-2026-03-22 13:12:36,541 - __main__ - ERROR - Unhandled exception.
+2026-03-23 21:10:00,190 - __main__ - ERROR - Unhandled exception.
 Traceback (most recent call last):
-  File "C:\Users\b\Desktop\Work\movie-agent\main.py", line 334, in __init__
+  File "C:\Users\b\Desktop\Work\movie-agent\main.py", line 338, in __init__
     self._main()
     ~~~~~~~~~~^^
-  File "C:\Users\b\Desktop\Work\movie-agent\main.py", line 340, in _main
-    self.agent.build_agent()
-    ~~~~~~~~~~~~~~~~~~~~~~^^
-  File "C:\Users\b\Desktop\Work\movie-agent\main.py", line 24, in build_agent
-    self.data=self.data_pipeline.main()
-              ~~~~~~~~~~~~~~~~~~~~~~~^^
-  File "C:\Users\b\Desktop\Work\movie-agent\main.py", line 95, in main
-    raise Exception('Failed to load base data')
-Exception: Failed to load base data
-2026-03-22 13:16:55,141 - __main__ - INFO - loading base data file...
-2026-03-22 13:16:56,852 - __main__ - INFO - file load complete!
-2026-03-22 13:21:50,725 - __main__ - INFO - loading base data file...
-2026-03-22 13:21:50,824 - __main__ - INFO - file load complete!
-2026-03-22 13:22:06,198 - __main__ - INFO - loading tsv file...
-2026-03-22 13:22:06,753 - __main__ - INFO - loading tsv file...
-2026-03-22 13:22:27,777 - __main__ - INFO - file load complete!
+  File "C:\Users\b\Desktop\Work\movie-agent\main.py", line 349, in _main
+    self.bayes=bayes.MoviePicker(candidates, previous_ids)
+               ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\b\Desktop\Work\movie-agent\scorer\bayesian_algorithm.py", line 20, in __init__
+    self._convert_dtypes()
+    ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\b\Desktop\Work\movie-agent\scorer\bayesian_algorithm.py", line 32, in _convert_dtypes
+    self.data['Published']=self.data['Published'].astype(int)
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\b\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\pandas\core\generic.py", line 6541, in astype
+    new_data = self._mgr.astype(dtype=dtype, errors=errors)
+  File "C:\Users\b\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\pandas\core\internals\managers.py", line 611, in astype
+    return self.apply("astype", dtype=dtype, errors=errors)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\b\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\pandas\core\internals\managers.py", line 442, in apply
+    applied = getattr(b, f)(**kwargs)
+  File "C:\Users\b\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\pandas\core\internals\blocks.py", line 607, in astype
+    new_values = astype_array_safe(values, dtype, errors=errors)
+  File "C:\Users\b\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\pandas\core\dtypes\astype.py", line 240, in astype_array_safe
+    new_values = astype_array(values, dtype, copy=copy)
+  File "C:\Users\b\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\pandas\core\dtypes\astype.py", line 182, in astype_array
+    values = values.astype(dtype, copy=copy)
+  File "C:\Users\b\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\pandas\core\arrays\string_arrow.py", line 330, in astype
+    return super().astype(dtype, copy=copy)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\b\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\pandas\core\arrays\base.py", line 881, in astype
+    return np.asarray(self, dtype=dtype)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\b\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\pandas\core\arrays\arrow\array.py", line 864, in __array__
+    return self.to_numpy(dtype=dtype, copy=copy)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\b\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\pandas\core\arrays\arrow\array.py", line 1717, in to_numpy
+    result = result.astype(dtype, copy=False)
+ValueError: invalid literal for int() with base 10: '\\N'
