@@ -5,6 +5,7 @@ import logging
 import pathlib as pl
 from pandas import Series
 import json
+from cons import constansts as cons
 
 logger=logging.getLogger(__name__)
 
@@ -27,17 +28,17 @@ class MoviePicker():
 
     def _convert_dtypes(self):
         """For numerical operations, convert columns to appropriate primitive type."""
-        self.data['Number of Votes']=self.data['Number of Votes'].astype(int)
-        self.data['Average Rating']=self.data['Average Rating'].astype(float)
-        self.data['Published']=self.data['Published'].astype(int)
+        self.data[cons.NUMBER_OF_VOTES_COLUMN]=self.data[cons.NUMBER_OF_VOTES_COLUMN].astype(int)
+        self.data[cons.AVERAGE_RATING_COLUMN]=self.data[cons.AVERAGE_RATING_COLUMN].astype(float)
+        self.data[cons.PUBLISHED_COLUMN]=self.data[cons.PUBLISHED_COLUMN].astype(int)
 
     def _build_score(self):
         """Builds bayesian algorithm taking release year, number of votes and average rating into account."""
         bayes_scores = []
         decay_factors = []
         adjusted_scores = []
-        m=self.data['Number of Votes'].mean()
-        c=self.data['Average Rating'].mean()
+        m=self.data[cons.NUMBER_OF_VOTES_COLUMN].mean()
+        c=self.data[cons.AVERAGE_RATING_COLUMN].mean()
         for index, movie in self.data.iterrows():
             b_score=self._calculate_bayesian_score(movie, m, c)
             d_factor=self._calculate_decay_factor(movie)
@@ -45,18 +46,18 @@ class MoviePicker():
             bayes_scores.append(b_score)
             decay_factors.append(d_factor)
             adjusted_scores.append(a_score)
-        self.data['Bayes Score'] = bayes_scores
-        self.data['Decay Factor'] = decay_factors
-        self.data['Adjusted Score'] = adjusted_scores
-        self.data['Date'] = self.date
+        self.data[cons.BAYES_SCORE_COLUMN] = bayes_scores
+        self.data[cons.DECAY_FACTOR_COLUMN] = decay_factors
+        self.data[cons.ADJUSTED_SCORE_COLUMN] = adjusted_scores
+        self.data[cons.DATE_COLUMN] = self.date
         return self
     
     def _pick_n_movie(self, n):
         """From score populated df, picks n amount of movies."""
         candidates=self.data.sort_values('Adjusted Score', ascending=False)
         for hashable, value in candidates.iterrows():
-            if value['IMDBid'] not in self.previously_recommended and len(self.picks) < n:
-                self.picks.append({'IMDBid': value['IMDBid'], 'Date': self.date})
+            if value[cons.IMDB_ID_COLUMN] not in self.previously_recommended and len(self.picks) < n:
+                self.picks.append({cons.IMDB_ID_COLUMN: value[cons.IMDB_ID_COLUMN], cons.DATE_COLUMN: self.date})
             elif len(self.picks)>=n:
                 break
         return self.picks
@@ -73,15 +74,15 @@ class MoviePicker():
         Returns:
             Weighted Bayesian score as a float.
         """
-        v=movie['Number of Votes']
-        r=movie['Average Rating']
+        v=movie[cons.NUMBER_OF_VOTES_COLUMN]
+        r=movie[cons.AVERAGE_RATING_COLUMN]
         bayes_score=(v/(v+m)) * r + (m/(v+m) * c)
         return bayes_score
     
     @staticmethod
     def _calculate_decay_factor(movie):
         """Calculate decay factor for single movie."""
-        years_old=datetime.date.today().year-int(movie['Published'])
+        years_old=datetime.date.today().year-int(movie[cons.PUBLISHED_COLUMN])
         if years_old<10:
             decay_factor=0.9997**years_old
         elif years_old<15:
@@ -128,7 +129,7 @@ class MovieFileOperator():
         for file_name, file_config in self.config_dict.items():
             file=self._load_file(file_name)
             if not isinstance(file, pd.DataFrame):
-                file=pd.DataFrame(columns=file_config['fallback'])
+                file=pd.DataFrame(columns=file_config[cons.FALLBACK_KEY])
             else:
                 pass
             self.data_store[file_name]=file
@@ -150,13 +151,13 @@ class MovieFileOperator():
     def _save_file(self, file: str):
         """Save file to internal config path."""
         if file in self.data_store:
-            self.data_store[file].to_parquet(str(self.config_dict[file]['path']))
+            self.data_store[file].to_parquet(str(self.config_dict[file][cons.PATH_KEY]))
         return self
 
     def _load_file(self, file:str):
         """Load file from internal config path."""
         try:
-            file=pd.read_parquet(str(self.config_dict[file]['path']))
+            file=pd.read_parquet(str(self.config_dict[file][cons.PATH_KEY]))
         except FileNotFoundError:
             return False
         except ValueError:
@@ -174,7 +175,7 @@ class MovieFileOperator():
             raise Exception('Failed to find .json config.')
         for key, value in config_dict.items():
             try:
-                value['path'] = pl.Path(__file__).parent.parent / value['path']
+                value[cons.PATH_KEY] = pl.Path(__file__).parent.parent / value[cons.PATH_KEY]
             except KeyError:
                 raise ValueError(f'Failed to find path for {key}')
         return config_dict
@@ -184,7 +185,7 @@ if __name__ == '__main__':
     candidates_df=pd.DataFrame(data)
     file_op=MovieFileOperator()
     file_op.load_all_files()
-    previous_ids=set(file_op.data_store.get('previous_data', pd.DataFrame()).get('IMDBid', []))
+    previous_ids=set(file_op.data_store.get('previous_data', pd.DataFrame()).get(cons.IMDB_ID_COLUMN, []))
     movie_picker=MoviePicker(candidates_df, previous_ids)
     movie_picker.recommend()
     file_op.concat_file({'previous_data': pd.DataFrame(movie_picker.picks), 'bayesian_data': movie_picker.data})

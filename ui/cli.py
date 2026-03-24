@@ -60,7 +60,7 @@ class UserInterface():
             try:
                 search = float(search)
                 if 1 <= search <= 10:
-                    self.all_filter_tools.append([constansts.AVERAGE_RATING_ID_COLUMN,'>', {search}])
+                    self.all_filter_tools.append([constansts.AVERAGE_RATING_COLUMN,'>', {search}])
                 else:
                     raise ValueError
             except ValueError:
@@ -71,9 +71,11 @@ class UserInterface():
         """Prompt user for search options and return input"""
         search = input(messages.GENRE_SEARCH)
         if self._is_exit(search):pass
+        elif 'genre' in search:
+            print(messages.GENRE_INFO)
         else:
             if self._is_input_help(search):self.display_help()
-            self.all_filter_tools.append([constansts.GENRE_ID_COLUMN,search])
+            self.all_filter_tools.append([constansts.GENRE_COLUMN,search])
 
     @staticmethod
     def _is_exit(user_input:str):
@@ -98,15 +100,18 @@ class UserInterface():
         flag=True
         while flag:
             user_input = input(messages.HELP_OPTIONS)
-            if user_input in 'genre':
+            user_input = user_input.lower().strip()
+            if 'genre' in user_input:
                 print(messages.GENRE_INFO)
                 flag=False
-            elif user_input in 'search':
+
+            elif 'search' in user_input:
                 print(messages.SEARCH_INFO)
+                flag=False
 
             elif self._is_exit(user_input):
                 flag=False
-
+            input('Press any key to continue...')
 
     @staticmethod
     def _return_input():
