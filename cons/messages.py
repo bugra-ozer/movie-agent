@@ -4,5 +4,5 @@ HELP_OPTIONS='\033c \nHelp options:\n\tsearch\n\tgenre\n\texit\n' #Used for expl
 INVALID_INPUT='Please enter a valid search type or type "exit" to leave the search.'
 RATING_SEARCH='\033c \nEnter a minimum rating value 1-10.\n\t'
 GENRE_SEARCH='\033c \nEnter a type of genre. To list genres, type "genre"\n\t'
-GENRE_INFO=f'\033 \nValid genres: Action\nAdventure\nAnimation\nBiography\nComedy\nCrime\nDocumentary\nDrama\nFamily\nFantasy\nFilm-Noir\nGame-Show\nHistory\nHorror\nMusic\nMusical\nMystery\nNews\nReality-TV\nRomance\nSci-Fi\nShort\nSport\nTalk-Show\nThriller\nWar\nWestern'
+GENRE_INFO=f'\033 \nValid genres: \n\tAction, Adventure, Animation, Biography, Comedy\n\tCrime, Documentary, Drama, Family,Fantasy\n\tFilm-Noir, Game-Show, History, Horror, Music\n\tMusical, Mystery, News, Reality-TV, Romance\n\tSci-Fi, Short, Sport, Talk-Show, Thriller, War, Western\n'
 SEARCH_INFO=f'\033cTo search for a movie, enter values such as: Average Rating, >, 5 or if looking for titles or genres, try typing and entering: Shawshank Redemption or Horror\n'

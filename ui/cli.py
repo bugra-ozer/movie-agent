@@ -95,18 +95,18 @@ class UserInterface():
 
     def display_help(self):
         """Print help instructions based on user request."""
-        user_input=input(messages.HELP_OPTIONS)
         flag=True
         while flag:
+            user_input = input(messages.HELP_OPTIONS)
             if user_input in 'genre':
-                logger.info(messages.GENRE_INFO)
-
+                print(messages.GENRE_INFO)
+                flag=False
             elif user_input in 'search':
-                logger.info(messages.SEARCH_INFO)
-                user_input=input(options)
+                print(messages.SEARCH_INFO)
 
             elif self._is_exit(user_input):
                 flag=False
+
 
     @staticmethod
     def _return_input():
