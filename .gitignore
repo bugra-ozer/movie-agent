@@ -7,7 +7,7 @@ __pycache__/
 data/*.parquet
 data/*.tsv
 *.tsv
-.log
+*.log
 
 # Vim
 *.un~

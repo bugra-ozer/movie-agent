@@ -3,6 +3,7 @@ import string
 import asyncio
 import logging
 import enum
+from cons import constansts, messages
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class UserInterface():
         while flag:
             user_input=self._return_input()
             if self._is_exit(user_input): break
-            elif self._is_input_help(user_input): self.display_help(user_input)
+            elif self._is_input_help(user_input): self.display_help()
             else:
                 flag=False
                 self._prompt_search()
@@ -34,7 +35,7 @@ class UserInterface():
         """Prompt user for search options and guide the user for search."""
         flag=True
         while flag:
-            user_input = input('\033c \nOptions to search for movies: \n\t-rating\n\t-genre\n\t-both\n\t-enter "exit" to leave search\n\t')
+            user_input = input(messages.MAIN_OPTIONS)
             if self._is_exit(user_input):
                 break
             try:
@@ -49,30 +50,30 @@ class UserInterface():
                         self._genre_search()
                 break
             except ValueError:
-                print('Please enter a valid search type or type "exit" to leave the search.')
+                print(messages.INVALID_INPUT)
 
     def _rating_search(self):
         """Prompt user for search options and return input"""
-        search = input('\033c \nEnter a minimum rating value 1-10.\n\t')
+        search = input(messages.RATING_SEARCH)
         if self._is_exit(search):pass
         else:
             try:
                 search = float(search)
                 if 1 <= search <= 10:
-                    self.all_filter_tools.append(['Average Rating','>', {search}])
+                    self.all_filter_tools.append([constansts.AVERAGE_RATING_ID_COLUMN,'>', {search}])
                 else:
                     raise ValueError
             except ValueError:
-                print('Please enter a valid rating value or type "exit" to leave the search.')
+                print(messages.INVALID_INPUT)
                 raise ValueError
 
     def _genre_search(self):
         """Prompt user for search options and return input"""
-        search = input('\033c \nEnter a type of genre. To list genres, type "genre"\n\t')
+        search = input(messages.GENRE_SEARCH)
         if self._is_exit(search):pass
         else:
-            if self._is_input_help(search):self.display_help(search)
-            self.all_filter_tools.append(['Genre',search])
+            if self._is_input_help(search):self.display_help()
+            self.all_filter_tools.append([constansts.GENRE_ID_COLUMN,search])
 
     @staticmethod
     def _is_exit(user_input:str):
@@ -87,26 +88,21 @@ class UserInterface():
     @staticmethod
     def _is_input_help(user_input:str):
         """Return boolean based on user input."""
-        if user_input in ['genre', 'search', 'filter', 'help', '-help']:
+        if user_input in ['--help', 'help', '-help']:
             return True
         else:
             return False
 
-    def display_help(self, user_input:str):
+    def display_help(self):
         """Print help instructions based on user request."""
-        options='\nOptions:\n\tsearch\n\tgenre\n\tfilter\n\tquit\n'
+        user_input=input(messages.HELP_OPTIONS)
         flag=True
         while flag:
             if user_input in 'genre':
-                logger.info(f'''\033Genres: Action\nAdventure\nAnimation\nBiography\nComedy\nCrime\nDocumentary\nDrama\nFamily\nFantasy\nFilm-Noir\nGame-Show\nHistory\nHorror\nMusic\nMusical\nMystery\nNews\nReality-TV\nRomance\nSci-Fi\nShort\nSport\nTalk-Show\nThriller\nWar\nWestern''')
-                user_input=input(options)
+                logger.info(messages.GENRE_INFO)
 
             elif user_input in 'search':
-                logger.info(f'''\033cTo search for a movie, enter values such as: Average Rating, >, 5 or if looking for titles or genres, try typing and entering: Shawshank Redemption or Horror\n''')
-                user_input=input(options)
-
-            elif user_input in 'filter':
-                logger.info(f'''\033cTo apply more than one filter, separate the filters by ''')
+                logger.info(messages.SEARCH_INFO)
                 user_input=input(options)
 
             elif self._is_exit(user_input):
@@ -115,8 +111,9 @@ class UserInterface():
     @staticmethod
     def _return_input():
         """Print user for valid options and return input"""
-        return input('\033c \t\t\t\t\t\t\tWelcome to movie agent!\n\nYour options: \n\t-press enter to search \n\t-type -help to open instructions menu \n\t-type "exit" to leave\n\t')
+        return input(messages.WELCOME)
 
 if __name__ == "__main__":
     """"""
     ui=UserInterface()
+    ui.start()

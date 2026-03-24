@@ -1,3 +1,5 @@
 IMDB_ID_COLUMN = 'IMDBid'
+GENRE_ID_COLUMN = 'Genre'
+AVERAGE_RATING_ID_COLUMN = 'Average Rating'
 PREVIOUS_DATA_KEY = 'previous_data'
 BAYESIAN_DATA_KEY = 'bayesian_data'
