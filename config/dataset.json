@@ -6,7 +6,8 @@
       "filename": "imdb.title.ratings.tsv.gz",
       "dec_filename": "imdb.title.ratings.tsv",
       "path": "data/imdb.title.ratings.tsv",
-      "folder": "data/"
+      "folder": "data/",
+      "usecols": ["tconst", "averageRating", "numVotes"]
   },
   "imdb.title.basics_data":
   {
@@ -15,6 +16,7 @@
       "filename": "imdb.title.basics.tsv.gz",
       "dec_filename": "imdb.title.basics.tsv",
       "path": "data/imdb.title.basics.tsv",
-      "folder": "data/"
+      "folder": "data/",
+      "usecols": ["tconst", "titleType","primaryTitle", "startYear", "genres"]
   }
 }
