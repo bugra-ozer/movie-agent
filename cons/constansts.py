@@ -1,8 +1,14 @@
 IMDB_ID_COLUMN = 'IMDBid'
 GENRE_COLUMN = 'Genre'
+GENRE_COLUMN_LEGACY = 'genres'
 PUBLISHED_COLUMN = 'Published'
+TITLE_TYPE_COLUMN = 'Title Type'
+TITLE_TYPE_COLUMN_LEGACY = 'titleType'
 PUBLISHED_COLUMN_LEGACY = 'startYear'
 NUMBER_OF_VOTES_COLUMN = 'Number of Votes'
+NUMBER_OF_VOTES_COLUMN_LEGACY = 'numVotes'
+PRIMARY_TITLE_COLUMN = 'Primary Title'
+PRIMARY_TITLE_COLUMN_LEGACY = 'primaryTitle'
 AVERAGE_RATING_COLUMN = 'Average Rating'
 BAYES_SCORE_COLUMN = 'Bay Score'
 DECAY_FACTOR_COLUMN = 'Decay Factor'
@@ -12,9 +18,9 @@ PREVIOUS_DATA_KEY = 'previous_data'
 BAYESIAN_DATA_KEY = 'bayesian_data'
 FALLBACK_KEY = 'fallback'
 PATH_KEY = 'path'
+COLUMNS_TO_KEEP='IMDBid', 'Average Rating', 'Number of Votes', 'Primary Title', 'Published', 'Genre'
+COLUMNS_TO_KEEP_LEGACY='tconst', 'averageRating', 'numVotes', 'primaryTitle', 'startYear', 'genres'
 COLUMN_RENAME_DICT={'tconst': 'IMDBid','averageRating': 'Average Rating',
                                     'numVotes': 'Number of Votes','titleType': 'Title Type',
                                     'primaryTitle': 'Primary Title','originalTitle': 'Original Title','isAdult': 'Is Adult',
                                     'startYear': 'Published','endYear': 'End Year','runtimeMinutes': 'Run Time Minutes','genres': 'Genre'}
-COLUMNS_TO_KEEP='IMDBid', 'Average Rating', 'Number of Votes', 'Primary Title', 'Published', 'Genre'
-COLUMNS_TO_KEEP_LEGACY='tconst', 'averageRating', 'numVotes', 'primaryTitle', 'startYear', 'genres'

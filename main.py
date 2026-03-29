@@ -69,9 +69,9 @@ class MovieAgent():
 
     def _purge_data(self):
         """Remove excessive items with low votes, empty primary titles and genres."""
-        self.data_frame = self._filter_rows('titleType', 'movie')  # remove anything else than movie in records
-        self.data_frame = self.data_frame[(self.data_frame['primaryTitle'].notna()) & (self.data_frame['genres'].notna()) & (self.data_frame['numVotes'] > 5000)]  # Purge unsuitable titles
-        self.data_frame.dropna(subset=[cons.PUBLISHED_COLUMN_LEGACY], inplace=True)
+        self.data = self._filter_rows(cons.TITLE_TYPE_COLUMN_LEGACY, 'movie')  # remove anything else than movie in records
+        self.data = self.data[(self.data[cons.PRIMARY_TITLE_COLUMN_LEGACY].notna()) & (self.data[cons.GENRE_COLUMN_LEGACY].notna()) & (self.data[cons.NUMBER_OF_VOTES_COLUMN_LEGACY] > 5000)]  # Purge unsuitable titles
+        self.data.dropna(subset=[cons.PUBLISHED_COLUMN_LEGACY], inplace=True)
         return self
 
 class DataPipeline():
@@ -222,7 +222,6 @@ class MovieFilter():
         self.configure_sort(cons.AVERAGE_RATING_COLUMN, False)
         filtered_candidates=self.sort_candidates(candidates) 
         logger.info('\033c') #Remove previous lines
-        logger.info(filtered_candidates.to_string(index=False, max_colwidth=45))
         return filtered_candidates
     
     @staticmethod
@@ -302,7 +301,7 @@ class MovieFilter():
             condition=self._build_string_condition(column_name, value)
         else: raise ValueError(f'Operation failed. One of the following is invalid: {column_name},{operator},{value}')
         return condition
-    
+
     def _build_string_condition(self, column_name:str, value):
         """Helper function that checks data for broader string matches, not exact."""
         if column_name is not None: #User is given two strings
@@ -347,6 +346,7 @@ class AppManager():
         self.cli.start()
         self.filter_tools:list[list[str]]=self.cli.all_filter_tools
         candidates=MovieFilter(self.agent.data, self.filter_tools, self.agent.raw_data).candidates
+        print(candidates)
         self.bayes=bayes.MoviePicker(candidates, previous_ids)
         self.bayes.recommend()
         self.file_operator.concat_file({cons.PREVIOUS_DATA_KEY: pd.DataFrame(self.bayes.picks), cons.BAYESIAN_DATA_KEY: self.bayes.data})
