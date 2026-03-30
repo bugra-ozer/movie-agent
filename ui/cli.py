@@ -48,19 +48,18 @@ class UserInterface():
                     case SearchTypes.BOTH:
                         self._rating_search()
                         self._genre_search()
-                break
             except ValueError:
                 print(messages.INVALID_INPUT)
 
     def _rating_search(self):
-        """Prompt user for search options and return input"""
+        """Prompt user for search help and return input"""
         search = input(messages.RATING_SEARCH)
         if self._is_exit(search):pass
         else:
             try:
                 search = float(search)
                 if 1 <= search <= 10:
-                    self.all_filter_tools.append([constansts.AVERAGE_RATING_COLUMN,'>', {search}])
+                    self.all_filter_tools.append([constansts.AVERAGE_RATING_COLUMN,'>', search])
                 else:
                     raise ValueError
             except ValueError:
@@ -68,7 +67,7 @@ class UserInterface():
                 raise ValueError
 
     def _genre_search(self):
-        """Prompt user for search options and return input"""
+        """Prompt user for search help and return input"""
         search = input(messages.GENRE_SEARCH)
         if self._is_exit(search):pass
         elif 'genre' in search:

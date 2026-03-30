@@ -253,11 +253,9 @@ class MovieFilter():
     def apply_filter(self, column_name:str, operatr:str, value:str):
         """Apply appropriate value as filter to column_name."""
         value=self._convert_value(column_name, value)
-        if column_name == 'Primary Title' or column_name == cons.GENRE_COLUMN:candidates=self.df[self._build_filter_condition(column_name, operatr, value, True)] #check for genre to make filter more inclusive.
-        else:
-            condition=self._build_filter_condition(column_name, operatr, value)
-            candidates=self.df[condition]
-            self._store_condition(condition)
+        condition=self._build_filter_condition(column_name, operatr, value)
+        candidates=self.df[condition]
+        self._store_condition(condition)
         return candidates
     
     def _store_condition(self, condition:pd.Series):
@@ -345,6 +343,7 @@ class AppManager():
         previous_ids=set(self.file_operator.data_store.get(cons.PREVIOUS_DATA_KEY, pd.DataFrame()).get(cons.IMDB_ID_COLUMN, []))
         self.cli.start()
         self.filter_tools:list[list[str]]=self.cli.all_filter_tools
+        print(self.filter_tools)
         candidates=MovieFilter(self.agent.data, self.filter_tools, self.agent.raw_data).candidates
         print(candidates)
         self.bayes=bayes.MoviePicker(candidates, previous_ids)
