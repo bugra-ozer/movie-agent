@@ -140,7 +140,7 @@ class DataPipeline():
             for tsv in self.tsv_configs:
                 logger.info('merging tsv file(s)...')
                 data_frames.append(self.data_loader.read_file(str(tsv['path']), 'tsv', usecols=tsv['usecols']))
-            data=self.data_loader.merge_dataframes(*data_frames, on='tconst')
+            data=self.data_loader.merge_dataframes(*data_frames, on=cons.IMDB_ID_COLUMN_LEGACY)
             self.data_loader.save_file(data, self.base_data_path)
         logger.info('file load complete!')
         return data
@@ -201,27 +201,25 @@ class MovieFilter():
     """Class that internally selects and stores selected movies after user filter is applied.\n
     Carries MovieAgent dataframe and MovieAgentBuilder raw_data internally"""
 
-    def __init__(self, df:pd.DataFrame, filter_tools:list[list[str]], raw_data:pd.DataFrame):
+    def __init__(self, df:pd.DataFrame, filter_tools:list[list[str]]):
         """Requires movieAgentBuilder object to initialize
         filter_tools: column_name, operatr, value to be filtered"""
         self.df=df.copy()
-        self.raw_data=raw_data.copy()
         self.condition = None
         self.sort_column = None
         self.sort_ascending = True
         self.genres=self.df[cons.GENRE_COLUMN].str.lower().str.split(',').explode().unique()
-        self.column_map={col.lower(): col for col in self.df.columns}
-        self.candidates=self.get_movies(filter_tools)
+        self.filter_tools=filter_tools
+        self.candidates=self.get_movies(self.filter_tools)
 
     def get_movies(self, filter_tools:list[list[str]]):
         """Retrieve list of movies with user filter applied.\n
         filter_tools: Filter params: column_name, operator, value such as: Average Rating, >, 7
         """
         #Check if column_name, operatr, value valid in dataframe
-        candidates=self.apply_all_filters(filter_tools)
+        candidates=self.apply_filters(filter_tools)
         self.configure_sort(cons.AVERAGE_RATING_COLUMN, False)
-        filtered_candidates=self.sort_candidates(candidates) 
-        logger.info('\033c') #Remove previous lines
+        filtered_candidates=self.sort_candidates(candidates)
         return filtered_candidates
     
     @staticmethod
@@ -241,16 +239,16 @@ class MovieFilter():
             return False
         return column_name, operatr, value
 
-    def apply_all_filters(self, filter_tools:list[list[str]]):
+    def apply_filters(self, filter_tools:list[list[str]]):
         """Unpacks filter tools and applies each filter in it manually."""
         candidates=self.df
         for filters in filter_tools:
             column_name, operatr, value=self._parse_filter_tools(filters)
-            self.apply_filter(column_name, operatr, value)
+            self._apply_filter(column_name, operatr, value)
             candidates=candidates[self.condition]
         return candidates
 
-    def apply_filter(self, column_name:str, operatr:str, value:str):
+    def _apply_filter(self, column_name:str, operatr:str, value:str):
         """Apply appropriate value as filter to column_name."""
         value=self._convert_value(column_name, value)
         condition=self._build_filter_condition(column_name, operatr, value)
@@ -270,7 +268,7 @@ class MovieFilter():
         new_value=value
         if column_name is None:
             return value
-        if pd.api.types.is_numeric_dtype(self.df[self.column_map[column_name.lower()]]): 
+        if pd.api.types.is_numeric_dtype(self.df[self.filter_tools[0]]):
             try: new_value=int(value)
             except ValueError: 
                 try: new_value=float(value) 
@@ -282,7 +280,7 @@ class MovieFilter():
         """Build pandas condition based on column, operator, and value\n
         contains: Movies tend to have more than one genre. To avoid fixed listing, you can set this setting to true to for instance: your horror movie search includes movies that have horror and action etc."""
         if operator is not None:
-            condition=self.df[self.column_map[column_name.lower()]]
+            condition=self.df[self.filter_tools[0]]
             if operator == ">":
                 return condition>value
             elif operator == "<":
@@ -303,12 +301,12 @@ class MovieFilter():
     def _build_string_condition(self, column_name:str, value):
         """Helper function that checks data for broader string matches, not exact."""
         if column_name is not None: #User is given two strings
-            condition=self.df[self.column_map[column_name.lower()]].str.lower().str.contains(value)
+            condition=self.df[self.filter_tools[0]].str.lower().str.contains(value)
         else: #User is given single string
             if value.lower() in self.genres:
-                condition=self.df[self.column_map['genre']].str.lower().str.contains(value)
+                condition=self.df[self.filter_tools[0]].str.lower().str.contains(value)
             else:
-                condition=self.df[self.column_map['primary title']].str.lower().str.contains(value)
+                condition=self.df[self.filter_tools[0]].str.lower().str.contains(value)
         return condition
     
     def configure_sort(self, column:str, ascend=True):
@@ -344,7 +342,7 @@ class AppManager():
         self.cli.start()
         self.filter_tools:list[list[str]]=self.cli.all_filter_tools
         print(self.filter_tools)
-        candidates=MovieFilter(self.agent.data, self.filter_tools, self.agent.raw_data).candidates
+        candidates=MovieFilter(self.agent.data, self.filter_tools).candidates
         print(candidates)
         self.bayes=bayes.MoviePicker(candidates, previous_ids)
         self.bayes.recommend()
