@@ -268,7 +268,7 @@ class MovieFilter():
         new_value=value
         if column_name is None:
             return value
-        if pd.api.types.is_numeric_dtype(self.df[self.filter_tools[0]]):
+        if pd.api.types.is_numeric_dtype(self.df[column_name]):
             try: new_value=int(value)
             except ValueError: 
                 try: new_value=float(value) 
@@ -279,34 +279,34 @@ class MovieFilter():
     def _build_filter_condition(self, column_name:str, operator:str, value:str):
         """Build pandas condition based on column, operator, and value\n
         contains: Movies tend to have more than one genre. To avoid fixed listing, you can set this setting to true to for instance: your horror movie search includes movies that have horror and action etc."""
-        if operator is not None:
-            condition=self.df[self.filter_tools[0]]
-            if operator == ">":
-                return condition>value
-            elif operator == "<":
-                return condition<value
-            elif operator == "<=":
-                return condition<=value
-            elif operator == ">=":
-                return condition>=value
-            elif operator == "==":
-                return condition==value
-            else:
+        if pd.api.types.is_numeric_dtype(self.df[column_name]):
+            try:
+                condition=self._build_numeric_condition(column_name, operator, value)
+            except ValueError:
                 raise ValueError(f'Filter operation failed. One of the following is invalid: {column_name},{operator},{value}')
         elif value is not None:
             condition=self._build_string_condition(column_name, value)
         else: raise ValueError(f'Operation failed. One of the following is invalid: {column_name},{operator},{value}')
         return condition
 
+    def _build_numeric_condition(self, column_name:str, operator:str, value:str):
+        condition = self.df[column_name]
+        if operator == ">":
+            return condition > value
+        elif operator == "<":
+            return condition < value
+        elif operator == "<=":
+            return condition <= value
+        elif operator == ">=":
+            return condition >= value
+        elif operator == "==":
+            return condition == value
+        else:
+            return ValueError
+
     def _build_string_condition(self, column_name:str, value):
         """Helper function that checks data for broader string matches, not exact."""
-        if column_name is not None: #User is given two strings
-            condition=self.df[self.filter_tools[0]].str.lower().str.contains(value)
-        else: #User is given single string
-            if value.lower() in self.genres:
-                condition=self.df[self.filter_tools[0]].str.lower().str.contains(value)
-            else:
-                condition=self.df[self.filter_tools[0]].str.lower().str.contains(value)
+        condition=self.df[column_name].str.lower().str.contains(value)
         return condition
     
     def configure_sort(self, column:str, ascend=True):
