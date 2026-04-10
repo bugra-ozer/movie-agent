@@ -334,7 +334,6 @@ class AppManager():
         previous_ids=set(self.file_operator.data_store.get(cons.PREVIOUS_DATA_KEY, pd.DataFrame()).get(cons.IMDB_ID_COLUMN, []))
         self.cli.start()
         self.filter_tools:list[list[str]]=self.cli.all_filter_tools
-        print(self.filter_tools)
         candidates=MovieFilter(self.agent.data, self.filter_tools).result
         print(candidates)
         self.bayes=bayes.MoviePicker(candidates, previous_ids)

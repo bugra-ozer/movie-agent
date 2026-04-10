@@ -72,6 +72,7 @@ class UserInterface():
         if self._is_exit(search):pass
         elif 'genre' in search:
             print(messages.GENRE_INFO)
+            input('Press any key to continue...')
         else:
             if self._is_input_help(search):self.display_help()
             self.all_filter_tools.append([constansts.GENRE_COLUMN,search])
@@ -103,14 +104,15 @@ class UserInterface():
             if 'genre' in user_input:
                 print(messages.GENRE_INFO)
                 flag=False
+                input('Press any key to continue...')
 
             elif 'search' in user_input:
                 print(messages.SEARCH_INFO)
                 flag=False
+                input('Press any key to continue...')
 
             elif self._is_exit(user_input):
                 flag=False
-            input('Press any key to continue...')
 
     @staticmethod
     def _return_input():
