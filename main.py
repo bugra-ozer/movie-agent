@@ -140,6 +140,7 @@ class DataPipeline():
             for tsv in self.tsv_configs:
                 logger.info('merging tsv file(s)...')
                 data_frames.append(self.data_loader.read_file(str(tsv['path']), 'tsv', usecols=tsv['usecols']))
+                self.data_loader.delete_file(tsv['path'])
             data=self.data_loader.merge_dataframes(*data_frames, on=cons.IMDB_ID_COLUMN_LEGACY)
             self.data_loader.save_file(data, self.base_data_path)
         logger.info('file load complete!')
@@ -195,6 +196,12 @@ class DataLoader():
             file.to_parquet(path)
         except Exception as e:
             raise IOError(f"Failed to save file: {e}") from e
+        return self
+
+    def delete_file(self, source):
+        """Delete file"""
+        if source.exists():
+            pl.Path(source).unlink()
         return self
 
 class MovieFilter():
