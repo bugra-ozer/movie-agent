@@ -9,8 +9,8 @@ from cons import constansts as cons
 
 logger=logging.getLogger(__name__)
 
-class MoviePicker():
-    """Algorithmic class that takes constrained data, outputs the best suitable movie."""
+class MovieScorer():
+    """Algorithmic class that takes transformed data, outputs the top n results based on bayesian score."""
     def __init__(self, candidates:pd.DataFrame, previously_recommended:set=None):
         if previously_recommended is None: previously_recommended=set()
         self.raw_data=candidates.copy()
@@ -20,7 +20,7 @@ class MoviePicker():
         self.picks=[]
         self._convert_dtypes()
 
-    def recommend(self):
+    def score(self):
         """Orchestrator method for building and processing the candidates and giving output."""
         self._build_score() #modifies self.data and adds scores as new columns
         self._pick_n_movie(3)
@@ -186,7 +186,7 @@ if __name__ == '__main__':
     file_op=MovieFileOperator()
     file_op.load_all_files()
     previous_ids=set(file_op.data_store.get('previous_data', pd.DataFrame()).get(cons.IMDB_ID_COLUMN, []))
-    movie_picker=MoviePicker(candidates_df, previous_ids)
-    movie_picker.recommend()
+    movie_picker=MovieScorer(candidates_df, previous_ids)
+    movie_picker.score()
     file_op.concat_file({'previous_data': pd.DataFrame(movie_picker.picks), 'bayesian_data': movie_picker.data})
     file_op.save_all_files()

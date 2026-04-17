@@ -198,10 +198,10 @@ class DataLoader():
             raise IOError(f"Failed to save file: {e}") from e
         return self
 
-    def delete_file(self, source):
-        """Delete file"""
-        if source.exists():
-            pl.Path(source).unlink()
+    def delete_file(self, path):
+        """Delete file with given absolute path"""
+        if path.exists():
+            pl.Path(path).unlink()
         return self
 
 class MovieFilter():
@@ -322,14 +322,39 @@ class MovieFilter():
             sorted_candidates=candidates
         return sorted_candidates
 
+class MovieService():
+    """Movie recommendation service that runs end to end."""
+
+    def __init__(self):
+        self.file_operator = bayes.MovieFileOperator()  # For bayesian calculations and caching
+        self.file_operator.load_all_files()
+        self.agent = MovieAgent()
+        self.agent.build_agent()
+        previous_ids = set(self.file_operator.data_store.get(cons.PREVIOUS_DATA_KEY, pd.DataFrame()).get(cons.IMDB_ID_COLUMN, []))
+        self.bayes=bayes.MovieScorer(self.agent.data, previous_ids)
+        self.data=self.bayes.data
+        self.bayes.score()
+
+    def recommend(self, filter_tools:list[list[str]]):
+        """"""
+        candidates=MovieFilter(self.data, filter_tools).result
+        #TODO PICK TOP N from candidates and CHANGE self.bayes.picks on the following line
+        self.file_operator.concat_file({cons.PREVIOUS_DATA_KEY: pd.DataFrame(self.bayes.picks), cons.BAYESIAN_DATA_KEY: self.bayes.data})
+        self.file_operator.save_all_files()
+
 class AppManager():
-    """Main orchestrator that assembles necessary classes and communication."""
+    """Main orchestrator that assembles prereq for service.
+    TODO: clean up AppManager from MovieService tasks, and make MovieService live in AppManager.
+        -cli and api decision lives and decided at this level.
+        -service does not care of cli and api difference."""
     
     def __init__(self):
         try:
-            self.file_operator=bayes.MovieFileOperator() #For bayesian calculations and caching
+            self.file_operator = bayes.MovieFileOperator()  # For bayesian calculations and caching
             self.file_operator.load_all_files()
-            self.agent=MovieAgent()
+            self.agent = MovieAgent()
+            self.agent.build_agent()
+            #self.movie_fetcher=MovieService()
             self.cli=ui.UserInterface()
             self._main()
         except Exception as e: # noqa
@@ -337,14 +362,15 @@ class AppManager():
 
     def _main(self):
         """"""
-        self.agent.build_agent()
         previous_ids=set(self.file_operator.data_store.get(cons.PREVIOUS_DATA_KEY, pd.DataFrame()).get(cons.IMDB_ID_COLUMN, []))
         self.cli.start()
         self.filter_tools:list[list[str]]=self.cli.all_filter_tools
         candidates=MovieFilter(self.agent.data, self.filter_tools).result
-        print(candidates)
-        self.bayes=bayes.MoviePicker(candidates, previous_ids)
-        self.bayes.recommend()
+        '''for i in candidates.to_dict(orient='records'):
+            print(i)
+            input('Next')'''
+        self.bayes=bayes.MovieScorer(candidates, previous_ids)
+        self.bayes.score()
         self.file_operator.concat_file({cons.PREVIOUS_DATA_KEY: pd.DataFrame(self.bayes.picks), cons.BAYESIAN_DATA_KEY: self.bayes.data})
         self.file_operator.save_all_files()
 
