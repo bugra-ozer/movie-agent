@@ -1,5 +1,9 @@
 from flask import request, Flask, jsonify
 from main import MovieService
+import os
+from pathlib import Path
+
+os.chdir(Path(__file__).parent.parent)
 
 app=Flask(__name__)
 service=MovieService()
@@ -13,4 +17,4 @@ def Service():
     return response
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)

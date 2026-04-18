@@ -332,15 +332,14 @@ class MovieService():
         self.agent.build_agent()
         previous_ids = set(self.file_operator.data_store.get(cons.PREVIOUS_DATA_KEY, pd.DataFrame()).get(cons.IMDB_ID_COLUMN, []))
         self.bayes=bayes.MovieScorer(self.agent.data, previous_ids)
-        self.data=self.bayes.data
         self.bayes.score()
+        self.data=self.bayes.data
 
     def recommend(self, filter_tools:list[list[str]]):
         """"""
         candidates = MovieFilter(self.data, filter_tools).result
         for i in candidates.to_dict(orient='records'):
             print(i)
-            input()
         #TODO PICK TOP N from candidates and CHANGE self.bayes.picks on the following line
         self.file_operator.concat_file({cons.PREVIOUS_DATA_KEY: pd.DataFrame(self.bayes.picks), cons.BAYESIAN_DATA_KEY: self.bayes.data})
         self.file_operator.save_all_files()
