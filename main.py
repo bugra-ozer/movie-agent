@@ -2,6 +2,7 @@ import pandas as pd
 import pathlib as pl
 import json
 import logging
+from persist import state_store
 from ui import cli as ui
 from networking import client as client
 from scorer import bayesian_algorithm as bayes
@@ -326,7 +327,7 @@ class MovieService():
     """Movie recommendation service that runs end to end."""
 
     def __init__(self):
-        self.file_operator = bayes.MovieFileOperator()  # For bayesian calculations and caching
+        self.file_operator = state_store.StateStore()  # For bayesian calculations and caching
         self.file_operator.load_all_files()
         self.agent = MovieAgent()
         self.agent.build_agent()

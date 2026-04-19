@@ -1,10 +1,7 @@
-from .test_data import data as data
-import pandas as pd
 import datetime
+import pandas as pd
 import logging
-import pathlib as pl
-from pandas import Series
-import json
+from persist import state_store
 from cons import constansts as cons
 
 logger=logging.getLogger(__name__)
@@ -96,97 +93,3 @@ class MovieScorer():
         else:
             decay_factor=0.9992**years_old
         return decay_factor
-
-class MovieFileOperator():
-    """Class that handles file operations for orchestrator class for caching."""
-    def __init__(self, json_cfg:str="file_operations.json"):
-        """Store properties and set configuration parsing."""
-        self.concat=None
-        self.data_store={}
-        self.json_cfg=json_cfg
-        self.config_dir='config'
-        self.config_dict:dict=self._load_config()
-        self.path=None
-
-    def save_all_files(self):
-        """Process saving all files."""
-        for file in self.data_store:
-            self._save_file(file)
-        return self
-
-    def load_all_files(self):
-        """Load and clear duplicates from all saved files."""
-        self._load_memory()
-        self._clear_memory_dupli()
-
-    def _clear_memory_dupli(self):
-        """Drop duplicates from all loaded files."""
-        for file_name, df in self.data_store.items():
-            self.data_store[file_name]=df.drop_duplicates()
-
-    def _load_memory(self):
-        """Load all files or reset it to given fallback property in config file."""
-        for file_name, file_config in self.config_dict.items():
-            file=self._load_file(file_name)
-            if not isinstance(file, pd.DataFrame):
-                file=pd.DataFrame(columns=file_config[cons.FALLBACK_KEY])
-            else:
-                pass
-            self.data_store[file_name]=file
-        return True
-
-    def concat_file(self, concat:dict=None):
-        """Concat dataframes for expanding files given in file_operations.json.
-
-        Args:
-            concat: dict that maps from file names to their update.
-            """
-        self.concat=concat
-        if self.concat is not None:
-            for file, value in self.concat.items():
-                if file in self.data_store:
-                    self.data_store[file]=pd.concat(objs=[self.data_store[file], value], ignore_index=True)
-        return self
-
-    def _save_file(self, file: str):
-        """Save file to internal config path."""
-        if file in self.data_store:
-            self.data_store[file].to_parquet(str(self.config_dict[file][cons.PATH_KEY]))
-        return self
-
-    def _load_file(self, file:str):
-        """Load file from internal config path."""
-        try:
-            file=pd.read_parquet(str(self.config_dict[file][cons.PATH_KEY]))
-        except FileNotFoundError:
-            return False
-        except ValueError:
-            return False
-        return file
-
-    def _load_config(self):
-        """Load configuration file for file operations."""
-        try:
-            with open(pl.Path(__file__).parent.parent/self.config_dir/self.json_cfg, "r") as f:
-                config_dict=json.load(f)
-        except ValueError:
-            raise Exception('Failed to open .json config.')
-        except FileNotFoundError:
-            raise Exception('Failed to find .json config.')
-        for key, value in config_dict.items():
-            try:
-                value[cons.PATH_KEY] = pl.Path(__file__).parent.parent / value[cons.PATH_KEY]
-            except KeyError:
-                raise ValueError(f'Failed to find path for {key}')
-        return config_dict
-
-if __name__ == '__main__':
-
-    candidates_df=pd.DataFrame(data)
-    file_op=MovieFileOperator()
-    file_op.load_all_files()
-    previous_ids=set(file_op.data_store.get('previous_data', pd.DataFrame()).get(cons.IMDB_ID_COLUMN, []))
-    movie_picker=MovieScorer(candidates_df, previous_ids)
-    movie_picker.score()
-    file_op.concat_file({'previous_data': pd.DataFrame(movie_picker.picks), 'bayesian_data': movie_picker.data})
-    file_op.save_all_files()
