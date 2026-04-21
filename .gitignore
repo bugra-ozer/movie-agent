@@ -16,3 +16,4 @@ logs/
 *.un~
 *.swp
 *.swo
+request_test.py

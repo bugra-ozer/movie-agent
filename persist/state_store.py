@@ -8,7 +8,7 @@ class StateStore():
     def __init__(self, json_cfg:str="state.json"):
         """Store properties and set configuration parsing."""
         self.concat=None
-        self.data_store={}
+        self.data={}
         self.json_cfg=json_cfg
         self.config_dir='config'
         self.config_dict:dict=self._load_config()
@@ -16,7 +16,7 @@ class StateStore():
 
     def save_all_files(self):
         """Process saving all files."""
-        for file in self.data_store:
+        for file in self.data:
             self._save_file(file)
         return self
 
@@ -27,8 +27,8 @@ class StateStore():
 
     def _clear_memory_dupli(self):
         """Drop duplicates from all loaded files."""
-        for file_name, df in self.data_store.items():
-            self.data_store[file_name]=df.drop_duplicates()
+        for file_name, df in self.data.items():
+            self.data[file_name]=df.drop_duplicates()
 
     def _load_memory(self):
         """Load all files or reset it to given fallback property in config file."""
@@ -38,7 +38,7 @@ class StateStore():
                 file=pd.DataFrame(columns=file_config[cons.FALLBACK_KEY])
             else:
                 pass
-            self.data_store[file_name]=file
+            self.data[file_name]=file
         return True
 
     def concat_file(self, concat:dict=None):
@@ -50,14 +50,14 @@ class StateStore():
         self.concat=concat
         if self.concat is not None:
             for file, value in self.concat.items():
-                if file in self.data_store:
-                    self.data_store[file]=pd.concat(objs=[self.data_store[file], value], ignore_index=True)
+                if file in self.data:
+                    self.data[file]=pd.concat(objs=[self.data[file], value], ignore_index=True)
         return self
 
     def _save_file(self, file: str):
         """Save file to internal config path."""
-        if file in self.data_store:
-            self.data_store[file].to_parquet(str(self.config_dict[file][cons.PATH_KEY]))
+        if file in self.data:
+            self.data[file].to_parquet(str(self.config_dict[file][cons.PATH_KEY]))
         return self
 
     def _load_file(self, file:str):

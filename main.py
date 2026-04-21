@@ -2,6 +2,7 @@ import pandas as pd
 import pathlib as pl
 import json
 import logging
+import random
 from persist import state_store
 from ui import cli as ui
 from networking import client as client
@@ -209,7 +210,7 @@ class MovieFilter():
     """Class that internally selects and stores selected movies after user filter is applied.\n
     Carries MovieAgent dataframe and MovieAgentBuilder raw_data internally"""
 
-    def __init__(self, df:pd.DataFrame, filter_tools:list[list[str]]):
+    def __init__(self, df:pd.DataFrame, filter_tools:list[list[str]], sort_column=cons.ADJUSTED_SCORE_COLUMN):
         """Requires movieAgentBuilder object to initialize
         filter_tools: column_name, operatr, value to be filtered"""
         self.df=df.copy()
@@ -217,15 +218,15 @@ class MovieFilter():
         self.sort_ascending = True
         self.genres=self.df[cons.GENRE_COLUMN].str.lower().str.split(',').explode().unique()
         self.filter_tools=filter_tools
-        self.result=self.get_movies(self.filter_tools)
+        self.result=self.get_movies(self.filter_tools, sort_column=sort_column)
 
-    def get_movies(self, filter_tools:list[list[str]]):
+    def get_movies(self, filter_tools:list[list[str]], sort_column=cons.ADJUSTED_SCORE_COLUMN):
         """Retrieve list of movies with user filter applied.\n
         filter_tools: Filter params: column_name, operator, value such as: Average Rating, >, 7
         """
         #Check if column_name, operatr, value valid in dataframe
         candidates=self.apply_filters(filter_tools)
-        self.configure_sort(cons.AVERAGE_RATING_COLUMN, False)
+        self.configure_sort(sort_column, False)
         result=self.sort_candidates(candidates)
         return result
     
@@ -327,24 +328,46 @@ class MovieService():
     """Movie recommendation service that runs end to end."""
 
     def __init__(self):
-        self.file_operator = state_store.StateStore()  # For bayesian calculations and caching
-        self.file_operator.load_all_files()
+        self.picks=None
+        self.state_store = state_store.StateStore()  # For caching
+        self.state_store.load_all_files()
         self.agent = MovieAgent()
         self.agent.build_agent()
-        previous_ids = set(self.file_operator.data_store.get(cons.PREVIOUS_DATA_KEY, pd.DataFrame()).get(cons.IMDB_ID_COLUMN, []))
-        self.bayes=bayes.MovieScorer(self.agent.data, previous_ids)
+        self.previous_ids = set(self.state_store.data.get(cons.PREVIOUS_DATA_KEY, pd.DataFrame()).get(cons.IMDB_ID_COLUMN, []))
+        self.bayes=bayes.MovieScorer(self.agent.data)
         self.bayes.score()
         self.data=self.bayes.data
 
     def recommend(self, filter_tools:list[list[str]]):
         """"""
         candidates = MovieFilter(self.data, filter_tools).result
-        for i in candidates.to_dict(orient='records'):
-            print(i)
-        #TODO PICK TOP N from candidates and CHANGE self.bayes.picks on the following line
-        self.file_operator.concat_file({cons.PREVIOUS_DATA_KEY: pd.DataFrame(self.bayes.picks), cons.BAYESIAN_DATA_KEY: self.bayes.data})
-        self.file_operator.save_all_files()
-        return candidates.to_dict(orient='records')
+        picks=self._pick_top(candidates, cons.M_POOL, cons.N_POP)
+        print(picks.to_string())
+        self.state_store.concat_file({cons.PREVIOUS_DATA_KEY: pd.DataFrame(picks[[cons.IMDB_ID_COLUMN, cons.DATE_COLUMN]]), cons.BAYESIAN_DATA_KEY: self.bayes.data})
+        self.state_store.save_all_files()
+        return picks.to_string()
+
+    def _pick_top(self, candidates:pd.DataFrame, m:int, n:int):
+        """
+
+        :param candidates:
+        :param m:
+        :param n:
+        :return:
+        """
+        if n > m > 0 >= n:
+            return ValueError('Pool can not be larger than population.')
+        else:
+            candidates = self._previous_drop(self.previous_ids, candidates, cons.IMDB_ID_COLUMN)
+            pool=candidates.head(m)
+            return pool.sample(n)
+
+    @staticmethod
+    def _previous_drop(data, import_data, column:str):
+        """Drops previously selected movies from import_data."""
+        invert_mask=~import_data[column].isin(data)
+        import_data=import_data[invert_mask]
+        return import_data
 
 class AppManager():
     """Main orchestrator that assembles prereq for service.

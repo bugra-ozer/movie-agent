@@ -8,19 +8,15 @@ logger=logging.getLogger(__name__)
 
 class MovieScorer():
     """Algorithmic class that takes transformed data, outputs the top n results based on bayesian score."""
-    def __init__(self, candidates:pd.DataFrame, previously_recommended:set=None):
-        if previously_recommended is None: previously_recommended=set()
+    def __init__(self, candidates:pd.DataFrame):
         self.raw_data=candidates.copy()
         self.data=candidates.copy()
         self.date=datetime.date.today()
-        self.previously_recommended=previously_recommended
-        self.picks=[]
         self._convert_dtypes()
 
     def score(self):
         """Orchestrator method for building and processing the candidates and giving output."""
         self._build_score() #modifies self.data and adds scores as new columns
-        self._pick_n_movie(3)
         return self
 
     def _convert_dtypes(self):
@@ -48,16 +44,6 @@ class MovieScorer():
         self.data[cons.ADJUSTED_SCORE_COLUMN] = adjusted_scores
         self.data[cons.DATE_COLUMN] = self.date
         return self
-    
-    def _pick_n_movie(self, n):
-        """From score populated df, picks n amount of movies."""
-        candidates=self.data.sort_values('Adjusted Score', ascending=False)
-        for hashable, value in candidates.iterrows():
-            if value[cons.IMDB_ID_COLUMN] not in self.previously_recommended and len(self.picks) < n:
-                self.picks.append({cons.IMDB_ID_COLUMN: value[cons.IMDB_ID_COLUMN], cons.DATE_COLUMN: self.date})
-            elif len(self.picks)>=n:
-                break
-        return self.picks
 
     @staticmethod
     def _calculate_bayesian_score(movie, m, c):
