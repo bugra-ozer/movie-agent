@@ -329,7 +329,7 @@ class MovieService():
 
     def __init__(self):
         self.picks=None
-        self.state_store = state_store.StateStore()  # For caching
+        self.state_store = state_store.StateStore()  #For caching
         self.state_store.load_all_files()
         self.agent = MovieAgent()
         self.agent.build_agent()
@@ -339,31 +339,35 @@ class MovieService():
         self.data=self.bayes.data
 
     def recommend(self, filter_tools:list[list[str]]):
-        """"""
-        candidates = MovieFilter(self.data, filter_tools).result
-        picks=self._pick_top(candidates, cons.M_POOL, cons.N_POP)
-        print(picks.to_string())
-        self.state_store.concat_file({cons.PREVIOUS_DATA_KEY: pd.DataFrame(picks[[cons.IMDB_ID_COLUMN, cons.DATE_COLUMN]]), cons.BAYESIAN_DATA_KEY: self.bayes.data})
-        self.state_store.save_all_files()
-        return picks.to_string()
-
-    def _pick_top(self, candidates:pd.DataFrame, m:int, n:int):
         """
 
-        :param candidates:
-        :param m:
-        :param n:
-        :return:
+        :param filter_tools:
+        :return: list of picked movies
+        """
+        candidates = MovieFilter(self.data, filter_tools).result
+        self.picks=self._pick_top(candidates, cons.M_POOL, cons.N_POP)
+        self.state_store.concat_file({cons.PREVIOUS_DATA_KEY: pd.DataFrame(self.picks[[cons.IMDB_ID_COLUMN, cons.DATE_COLUMN]])})
+        self.state_store.save_all_files()
+        print(self.picks.to_string())
+        return self.picks
+
+    def _pick_top(self, pool:pd.DataFrame, m:int, n:int):
+        """
+
+        :param pool: Main subpool of movies
+        :param m: subpool from pool
+        :param n: amount of movies picked at random from subpool m
+        :return: flat list
         """
         if n > m > 0 >= n:
             return ValueError('Pool can not be larger than population.')
         else:
-            candidates = self._previous_drop(self.previous_ids, candidates, cons.IMDB_ID_COLUMN)
-            pool=candidates.head(m)
-            return pool.sample(n)
+            pool = self._drop_previous(self.previous_ids, pool, cons.IMDB_ID_COLUMN)
+            subpool=pool.head(m)
+            return subpool.sample(n)
 
     @staticmethod
-    def _previous_drop(data, import_data, column:str):
+    def _drop_previous(data, import_data:pd.DataFrame, column:str):
         """Drops previously selected movies from import_data."""
         invert_mask=~import_data[column].isin(data)
         import_data=import_data[invert_mask]
@@ -371,7 +375,7 @@ class MovieService():
 
 class AppManager():
     """Main orchestrator that assembles prereq for service.
-    TODO: clean up AppManager from MovieService tasks, and make MovieService live in AppManager.
+    TODO:
         -cli and api decision lives and decided at this level.
         -service does not care of cli and api difference."""
     
