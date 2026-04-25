@@ -9,6 +9,9 @@ data/*.tsv
 *.tsv
 *.idea
 
+#Server
+server.py
+
 # Log files
 logs/
 
@@ -17,3 +20,5 @@ logs/
 *.swp
 *.swo
 request_test.py
+*.env
+*.venv

@@ -349,7 +349,7 @@ class MovieService():
         self.state_store.concat_file({cons.PREVIOUS_DATA_KEY: pd.DataFrame(self.picks[[cons.IMDB_ID_COLUMN, cons.DATE_COLUMN]])})
         self.state_store.save_all_files()
         print(self.picks.to_string())
-        return self.picks
+        return self.picks.to_dict(orient='records')
 
     def _pick_top(self, pool:pd.DataFrame, m:int, n:int):
         """
@@ -357,7 +357,7 @@ class MovieService():
         :param pool: Main subpool of movies
         :param m: subpool from pool
         :param n: amount of movies picked at random from subpool m
-        :return: flat list
+        :return: Pandas.DataFrame
         """
         if n > m > 0 >= n:
             return ValueError('Pool can not be larger than population.')
