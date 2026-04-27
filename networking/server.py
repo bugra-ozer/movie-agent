@@ -3,6 +3,7 @@ from main import MovieService
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import datetime, timezone, timedelta
+import secrets
 import bcrypt
 import jwt
 import os
@@ -13,6 +14,7 @@ secret_key=os.environ.get("SECRET_KEY")
 app=Flask(__name__)
 service=MovieService()
 USERS={"admin": b'$2b$12$Gy9z3lihHck5fCP4dAJMB.JzryhwuExZgHJ49GgynNW5t88hEuOLa'} # noqa
+REF_TOKENS={}
 
 @app.before_request
 def before_request():
@@ -29,7 +31,7 @@ def before_request():
             except jwt.ExpiredSignatureError: return jsonify({'status': 'error', 'message': 'Token has expired'}), 401
             except jwt.InvalidTokenError: return jsonify({'status': 'error', 'message': 'Token is invalid'}), 401
             return None
-    else: #TODO: login check, user hitting login: check db if true give token
+    else: #TODO: replace hardcoded USERS with db
         text=request.get_json(force=True)
         userid=text.get('id')
         pw=text.get("pw")
@@ -37,8 +39,11 @@ def before_request():
             return jsonify({'status': 'error', 'message': 'User not found'}), 401
         else:
             pw=pw.encode('UTF-8')
-            if bcrypt.checkpw(pw,USERS[userid]) is True:
-                return jwt.encode(payload={'id': userid, 'exp': datetime.now(timezone.utc)+timedelta(minutes=15), 'role': 'admin'}, key=secret_key, algorithm='HS256')
+            if bcrypt.checkpw(pw, USERS[userid]):
+                ref_token=secrets.token_hex(32)
+                REF_TOKENS[ref_token]=userid
+                access_token=jwt.encode(payload={'id': userid, 'exp': datetime.now(timezone.utc)+timedelta(minutes=15), 'role': 'admin'}, key=secret_key, algorithm='HS256')
+                return jsonify({'status': 'success', 'message': 'Successfully logged in', 'access_token': access_token, 'refresh_token': ref_token})
             else:
                 return jsonify({'status': 'error', 'message': 'Password is incorrect'}), 401
 
