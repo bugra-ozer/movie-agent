@@ -1,5 +1,4 @@
-M_POOL=25
-N_POP=5
+#Pandas cons
 IMDB_ID_COLUMN = 'IMDBid'
 IMDB_ID_COLUMN_LEGACY = 'tconst'
 GENRE_COLUMN = 'Genre'
@@ -17,13 +16,21 @@ BAYES_SCORE_COLUMN = 'Bay Score'
 DECAY_FACTOR_COLUMN = 'Decay Factor'
 ADJUSTED_SCORE_COLUMN = 'Adjusted Score'
 DATE_COLUMN = 'Date'
-PREVIOUS_DATA_KEY = 'previous_data'
-BAYESIAN_DATA_KEY = 'bayesian_data'
-FALLBACK_KEY = 'fallback'
-PATH_KEY = 'path'
 COLUMNS_TO_KEEP='IMDBid', 'Average Rating', 'Number of Votes', 'Primary Title', 'Published', 'Genre'
 COLUMNS_TO_KEEP_LEGACY='tconst', 'averageRating', 'numVotes', 'primaryTitle', 'startYear', 'genres'
 COLUMN_RENAME_DICT={'tconst': 'IMDBid','averageRating': 'Average Rating',
                                     'numVotes': 'Number of Votes','titleType': 'Title Type',
                                     'primaryTitle': 'Primary Title','originalTitle': 'Original Title','isAdult': 'Is Adult',
                                     'startYear': 'Published','endYear': 'End Year','runtimeMinutes': 'Run Time Minutes','genres': 'Genre'}
+#Config cons
+PREVIOUS_DATA_KEY = 'previous_data'
+BAYESIAN_DATA_KEY = 'bayesian_data'
+FALLBACK_KEY = 'fallback'
+PATH_KEY = 'path'
+
+#API cons
+PUBLIC_PATHS='/login', '/refresh'
+
+#Bayes cons
+M_POOL=25
+N_POP=5

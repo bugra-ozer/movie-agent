@@ -1,10 +1,10 @@
 from os import access
-
 from flask import request, Flask, jsonify
 from main import MovieService
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import datetime, timezone, timedelta
+from constants import constansts as cons
 import secrets
 import bcrypt
 import jwt
@@ -14,10 +14,10 @@ os.chdir(Path(__file__).parent.parent)
 load_dotenv()
 secret_key=os.environ.get("SECRET_KEY")
 app=Flask(__name__)
-service=MovieService()
+app_service=MovieService()
 USERS={"admin": b'$2b$12$Gy9z3lihHck5fCP4dAJMB.JzryhwuExZgHJ49GgynNW5t88hEuOLa'} # noqa
 REF_TOKENS={}
-PUBLIC_PATHS='/login', '/refresh'
+PUBLIC_PATHS=cons.PUBLIC_PATHS
 
 @app.before_request
 def before_request():
@@ -71,7 +71,7 @@ def refresh():
 def service():
     text = request.get_json(force=True)
     filter_tools = text['filter_tools']
-    response=service.recommend(filter_tools)
+    response=app_service.recommend(filter_tools)
     response=jsonify(response)
     return response
 

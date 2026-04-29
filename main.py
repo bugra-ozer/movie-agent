@@ -380,7 +380,7 @@ class AppManager():
     
     def __init__(self):
         try:
-            self.movie_fetcher=MovieService()
+            self.movie_service=MovieService()
             self.cli=ui.UserInterface()
             self._main()
         except Exception as e: # noqa
@@ -390,7 +390,7 @@ class AppManager():
         """"""
         self.cli.start()
         self.filter_tools:list[list[str]]=self.cli.all_filter_tools
-        self.movie_fetcher.recommend(self.filter_tools)
+        self.movie_service.recommend(self.filter_tools)
 
 if __name__ == '__main__':
     AppManager()
