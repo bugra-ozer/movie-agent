@@ -3,7 +3,7 @@ import string
 import asyncio
 import logging
 import enum
-from cons import constansts, messages
+from constants import constansts, messages
 
 logger = logging.getLogger(__name__)
 

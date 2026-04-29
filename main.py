@@ -2,13 +2,12 @@ import pandas as pd
 import pathlib as pl
 import json
 import logging
-import random
-from persist import state_store
+from persister import state_store
 from ui import cli as ui
-from networking import client as client
+from downloader import downloader as client
 from scorer import bayesian_algorithm as bayes
 from logs import log_handler
-from cons import constansts as cons
+from constants import constansts as cons
 
 log_handler.LogHandler()
 logger=logging.getLogger(__name__)
