@@ -4,7 +4,7 @@ from main import MovieService
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import datetime, timezone, timedelta
-from constants import constansts as cons
+from constant import constansts as cons
 import secrets
 import bcrypt
 import jwt

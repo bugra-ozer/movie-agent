@@ -3,9 +3,9 @@ import pathlib as pl
 from logging import handlers
 
 class LogHandler():
-    """Class for managing logs"""
+    """Class for managing log"""
 
-    def __init__(self, directory='logs', filename='log.log'):
+    def __init__(self, directory='log', filename='log.log'):
         self.filename=filename
         self.path=pl.Path(__file__).parent.parent / directory / filename #Create full path
         pl.Path.mkdir(self.path.parent, parents=True, exist_ok=True) #Make directory for logging files

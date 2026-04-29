@@ -6,8 +6,8 @@ from persister import state_store
 from ui import cli as ui
 from downloader import downloader as client
 from scorer import bayesian_algorithm as bayes
-from logs import log_handler
-from constants import constansts as cons
+from log import log_handler
+from constant import constansts as cons
 
 log_handler.LogHandler()
 logger=logging.getLogger(__name__)
@@ -347,7 +347,7 @@ class MovieService():
         self.picks=self._pick_top(candidates, cons.M_POOL, cons.N_POP)
         self.state_store.concat_file({cons.PREVIOUS_DATA_KEY: pd.DataFrame(self.picks[[cons.IMDB_ID_COLUMN, cons.DATE_COLUMN]])})
         self.state_store.save_all_files()
-        print(self.picks.to_string())
+        self.picks=self.picks.drop(columns=[cons.DECAY_FACTOR_COLUMN, cons.BAYES_SCORE_COLUMN, cons.DATE_COLUMN, cons.ADJUSTED_SCORE_COLUMN])
         return self.picks.to_dict(orient='records')
 
     def _pick_top(self, pool:pd.DataFrame, m:int, n:int):

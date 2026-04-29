@@ -13,7 +13,7 @@ data/*.tsv
 server.py
 
 # Log files
-logs/
+log/
 
 # Vim
 *.un~
