@@ -41,14 +41,18 @@ def before_request():
             pw=pw.encode('UTF-8')
             if bcrypt.checkpw(pw, USERS[userid]):
                 ref_token=secrets.token_hex(32)
-                REF_TOKENS[ref_token]=userid
+                REF_TOKENS[ref_token]=userid, datetime.now(timezone.utc)+timedelta(days=30)
                 access_token=jwt.encode(payload={'id': userid, 'exp': datetime.now(timezone.utc)+timedelta(minutes=15), 'role': 'admin'}, key=secret_key, algorithm='HS256')
-                return jsonify({'status': 'success', 'message': 'Successfully logged in', 'access_token': access_token, 'refresh_token': ref_token})
+                return jsonify({'access_token': access_token, 'refresh_token': ref_token})
             else:
                 return jsonify({'status': 'error', 'message': 'Password is incorrect'}), 401
 
+@app.route("/refresh", methods=['GET'])
+def refresh():
+    """Acquire new access token endpoint"""
+
 @app.route("/recommendations", methods=['POST'])
-def Service():
+def service():
     text = request.get_json(force=True)
     filter_tools = text['filter_tools']
     response=service.recommend(filter_tools)
@@ -56,7 +60,7 @@ def Service():
     return response
 
 @app.route("/health", methods=['GET'])
-def Health():
+def health():
     return jsonify({'status': 'ok'})
 
 if __name__ == "__main__":
