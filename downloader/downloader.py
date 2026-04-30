@@ -2,6 +2,7 @@ import json
 import requests
 import pathlib as pl
 import gzip
+from constant import constansts as cons
 from tqdm import tqdm
 import logging
 
@@ -11,7 +12,7 @@ class DatasetDownloader():
     """Class for making HTTP requests"""
     def __init__(self, json_cfg:str="dataset.json"):
         self.json_cfg=json_cfg
-        self.config_dir='config'
+        self.config_dir=cons.CONFIG_DIR
         self.response=None
         self.file= ""
 

@@ -1,7 +1,10 @@
+from logging import exception
+
 import pandas as pd
 import pathlib as pl
 import json
 import logging
+from datetime import datetime, timezone, timedelta
 from persister import state_store
 from ui import cli as ui
 from downloader import downloader as client
@@ -131,10 +134,28 @@ class DataPipeline():
                 self.tsv_configs.append(value)
         return self
 
+    @staticmethod
+    def _is_data_stale():
+        """Check if base data is stale or not."""
+        if pl.Path.exists((pl.Path(__file__).parent / cons.CONFIG_DIR / cons.BASE_DATA_EXP_FILE)):  # check config file
+            base_data_exp = json.load(open((pl.Path(__file__).parent / cons.CONFIG_DIR / cons.BASE_DATA_EXP_FILE)))
+            return datetime.now(timezone.utc) - datetime.fromisoformat(base_data_exp[cons.BASE_DATA_EXP_JSON]) > timedelta(weeks=2)  # return boolean
+        else:
+            return True
+
+    @staticmethod
+    def _update_base_data_exp():
+        """Update base data expiry date."""
+        if pl.Path.exists((pl.Path(__file__).parent / cons.CONFIG_DIR / cons.BASE_DATA_EXP_FILE)):  # check config file
+            base_data_exp = json.load(open((pl.Path(__file__).parent / cons.CONFIG_DIR / cons.BASE_DATA_EXP_FILE), mode='r'))
+            update=datetime.now().isoformat()
+            base_data_exp[cons.BASE_DATA_EXP_JSON]=update
+            json.dump(base_data_exp, open((pl.Path(__file__).parent / cons.CONFIG_DIR / cons.BASE_DATA_EXP_FILE), 'w'))
+
     def build_data(self):
         """Read if processed file exists, else run operations to initiate one."""
         data_frames=[]
-        if pl.Path.exists(self.base_data_path):
+        if pl.Path.exists(self.base_data_path) and not self._is_data_stale():
             logger.info('loading base data file...')
             data=self.data_loader.read_file(str(self.base_data_path), 'parquet')
         else:
@@ -144,6 +165,7 @@ class DataPipeline():
                 self.data_loader.delete_file(tsv['path'])
             data=self.data_loader.merge_dataframes(*data_frames, on=cons.IMDB_ID_COLUMN_LEGACY)
             self.data_loader.save_file(data, self.base_data_path)
+            self._update_base_data_exp()
         logger.info('file load complete!')
         return data
 

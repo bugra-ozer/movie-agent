@@ -27,6 +27,9 @@ PREVIOUS_DATA_KEY = 'previous_data'
 BAYESIAN_DATA_KEY = 'bayesian_data'
 FALLBACK_KEY = 'fallback'
 PATH_KEY = 'path'
+BASE_DATA_EXP_FILE = 'base_data_exp.json'
+CONFIG_DIR = 'config'
+BASE_DATA_EXP_JSON='last_update'
 
 #API cons
 PUBLIC_PATHS='/login', '/refresh'
