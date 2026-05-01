@@ -28,24 +28,27 @@ class DatasetDownloader():
     def _download_file(self, url, destination, stream=True):
         """Make http request and write to destination."""
         self.response=requests.get(url, stream=stream)
-        total_chunks=(float(self.response.headers.get('Content-Length'))+8191)//8192
+        total=(float(self.response.headers.get('Content-Length')))
         if self.response.status_code == 200:
+            bar:tqdm=tqdm(total=total, unit='B', unit_scale=True, bar_format='\033[37m{l_bar}\033[32m{bar}\033[37m{r_bar}',ncols=120, desc=f'downloading dataset as {self.file}')
             with open(destination, "wb") as f:
-                for chunk in tqdm(self.response.iter_content(chunk_size=8192), total=total_chunks, unit='B', unit_scale=True, bar_format='\033[37m{l_bar}\033[32m{bar}\033[37m{r_bar}', ncols=120, desc=f'downloading dataset as {self.file}'):
+                for chunk in self.response.iter_content(chunk_size=8192):
                     f.write(chunk)
+                    bar.update(len(chunk))
                 return True
         else:raise Exception(f'Download failed. Server threw status code: {self.response.status_code}.')
 
     def _decompress_file(self, source, destination):
         """Decompress .gz files, clean up and save to destination."""
         if source.exists():
+            comp_size = pl.Path(source).stat().st_size  # in bytes
+            bar:tqdm=tqdm(total=comp_size, unit='B', unit_scale=True, bar_format='\033[37m{l_bar}\033[32m{bar}\033[37m{r_bar}', ncols=120, desc=f'decompressing dataset {self.file}') #1 MB packets
             with gzip.open(source, "rb") as f_in, open(destination, "wb") as f_out:
-                for chunk in tqdm(iter(lambda: f_in.read(1000000), b""), unit='B', unit_scale=True, bar_format='\033[37m{l_bar}\033[32m{bar}\033[37m{r_bar}', ncols=120, desc=f'decompressing dataset {self.file}'): #1 MB packets
+                for chunk in iter(lambda: f_in.read(1000000), b""):
                     f_out.write(chunk)
+                    bar.update(len(chunk))
             self._delete_file(source) #delete compressed file (.tsv.gz)
-        else:
-
-            raise Exception(f'Decompression failed. {source} not found.')
+        else:raise Exception(f'Decompression failed. {source} not found.')
 
     def _delete_file(self, source):
         """Delete file"""
