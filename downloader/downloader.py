@@ -42,11 +42,14 @@ class DatasetDownloader():
         """Decompress .gz files, clean up and save to destination."""
         if source.exists():
             comp_size = pl.Path(source).stat().st_size  # in bytes
+            previous = 0
             bar:tqdm=tqdm(total=comp_size, unit='B', unit_scale=True, bar_format='\033[37m{l_bar}\033[32m{bar}\033[37m{r_bar}', ncols=120, desc=f'decompressing dataset {self.file}') #1 MB packets
             with gzip.open(source, "rb") as f_in, open(destination, "wb") as f_out:
                 for chunk in iter(lambda: f_in.read(1000000), b""):
                     f_out.write(chunk)
-                    bar.update(len(chunk))
+                    current=f_in.fileobj.tell() # noqa
+                    bar.update(current-previous)
+                    previous=current
             self._delete_file(source) #delete compressed file (.tsv.gz)
         else:raise Exception(f'Decompression failed. {source} not found.')
 
