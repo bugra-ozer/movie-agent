@@ -71,6 +71,11 @@ def refresh():
 def service():
     text = request.get_json(force=True)
     if text.get('filter_tools') is None: return jsonify({'status': 'error', 'message': 'Filter tools not found, fix request body'}), 400
+    if text.get('filter_tools') == []: pass # noqa
+    for outer in text.get('filter_tools'): #dict comprehensions for checking filter tools structure validity
+        if isinstance(outer, list):
+            if not all(([isinstance(inner_str, str) for inner_str in outer])):
+                return jsonify({'status': 'error', 'message': 'Invalid filter_tools.'})
     filter_tools = text['filter_tools']
     response=app_service.recommend(filter_tools)
     response=jsonify(response)
