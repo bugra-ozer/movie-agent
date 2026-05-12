@@ -47,7 +47,7 @@ def login():
         if bcrypt.checkpw(pw, USERS[userid]):
             ref_token=secrets.token_hex(32)
             REF_TOKENS[ref_token]=userid, datetime.now(timezone.utc)+timedelta(days=30)
-            access_token=jwt.encode(payload={'id': userid, 'exp': datetime.now(timezone.utc)+timedelta(minutes=15), 'role': 'admin'}, key=secret_key, algorithm='HS256')
+            access_token=jwt.encode(payload={'id': userid, 'exp': datetime.now(timezone.utc)+timedelta(minutes=15), 'role': USERS[userid]['role']}, key=secret_key, algorithm='HS256')
             return jsonify({'access_token': access_token, 'refresh_token': ref_token, 'id': userid}), 200
         else:
             return jsonify({'status': cons.ERROR, 'message': cons.PW_INCORRECT}), 401
