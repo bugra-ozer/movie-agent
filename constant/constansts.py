@@ -33,6 +33,16 @@ BASE_DATA_EXP_JSON='last_update'
 
 #API cons
 PUBLIC_PATHS='/login', '/refresh', '/health'
+FILTER_TOOLS_INVALID='Invalid filter_tools'
+FILTER_TOOLS_NOT_SURE='Filter tools not found or invalid'
+ERROR=('ERROR')
+TOKEN_EXPIRED='Token has expired'
+TOKEN_INVALID='Token is invalid'
+TOKEN_MISSING='Token is missing'
+OK=('ok')
+PW_INCORRECT='Password is incorrect'
+AUTHORIZATION='Authorization'
+USER_NOT_FOUND='User not found'
 
 #Bayes cons
 M_POOL=25
