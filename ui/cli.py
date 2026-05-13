@@ -3,7 +3,7 @@ import string
 import asyncio
 import logging
 import enum
-from constant import constansts, messages
+from constant import constants, messages
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ class UserInterface():
             try:
                 search = float(search)
                 if 1 <= search <= 10:
-                    self.all_filter_tools.append([constansts.AVERAGE_RATING_COLUMN,'>', search])
+                    self.all_filter_tools.append([constants.AVERAGE_RATING_COLUMN,'>', search])
                 else:
                     raise ValueError
             except ValueError:
@@ -72,10 +72,10 @@ class UserInterface():
         if self._is_exit(search):pass
         elif 'genre' in search:
             print(messages.GENRE_INFO)
-            input('Press any key to continue...')
+            input(constants.INFO_PRESS_ANY)
         else:
             if self._is_input_help(search):self.display_help()
-            self.all_filter_tools.append([constansts.GENRE_COLUMN,search])
+            self.all_filter_tools.append([constants.GENRE_COLUMN,search])
 
     @staticmethod
     def _is_exit(user_input:str):
@@ -104,12 +104,12 @@ class UserInterface():
             if 'genre' in user_input:
                 print(messages.GENRE_INFO)
                 flag=False
-                input('Press any key to continue...')
+                input(constants.INFO_PRESS_ANY)
 
             elif 'search' in user_input:
                 print(messages.SEARCH_INFO)
                 flag=False
-                input('Press any key to continue...')
+                input(constants.INFO_PRESS_ANY)
 
             elif self._is_exit(user_input):
                 flag=False

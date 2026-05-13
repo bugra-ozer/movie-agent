@@ -9,13 +9,13 @@ from ui import cli as ui
 from downloader import downloader as client
 from scorer import bayesian_algorithm as bayes
 from log import log_handler
-from constant import constansts as cons
+from constant import constants as cons
 
 log_handler.LogHandler()
 logger=logging.getLogger(__name__)
 
 class Container():
-    """Container class for managing the state of the dataframe"""
+    """Container class for retaining and managing the state of the dataframe."""
 
     def __init__(self):
         self.data=pd.DataFrame()
@@ -58,7 +58,7 @@ class Container():
     def _apply_column_selection(self):
         """Based on condition, mutate the data to display"""
         if self.data is None:
-            raise ValueError(f'Failed to apply condition to the file.')
+            raise ValueError(cons.ERROR_APPLY_CON)
         if self and self.condition:
             self.data=self.data[self.condition]
             self.condition=None #Consume condition after applying for predictable code
@@ -90,16 +90,16 @@ class DataPipeline():
         self.dataset_downloader=client.DatasetDownloader()
 
     def main(self):
-        """"""
+        """Load file data from config and build or load the dataset."""
         self._load_config()
         self._fetch_paths()
         self._convert_config_pl()
         if self.base_data_path is None:
-            raise Exception('Failed to load base data')
+            raise Exception(cons.ERROR_LOAD_BASE_DATA)
         elif not self.tsv_configs:
-            raise Exception('Failed to load tsv paths')
+            raise Exception(cons.ERROR_LOAD_TSV_PATH)
         if not pl.Path(self.base_data_path).exists(): #check for base_data, if it exists skip all download dataset operation.
-            if any(tsv for tsv in [*self.tsv_configs] if not pl.Path(tsv['path']).exists()): #if file paths are empty orchestrate http request.
+            if any(tsv for tsv in [*self.tsv_configs] if not pl.Path(tsv[cons.PATH_COLUMN]).exists()): #if file paths are empty orchestrate http request for dataset download.
                 self.dataset_downloader.main()
         return self.build_data()
 
@@ -128,7 +128,7 @@ class DataPipeline():
         """Fetch tsv file and base file paths"""
         for key, value in self.config_dict.items():
             if 'base' in str(key):
-                self.base_data_path = value['path']
+                self.base_data_path = value[cons.PATH_COLUMN]
             if 'imdb' in str(key):
                 self.tsv_configs.append(value)
         return self
@@ -146,11 +146,10 @@ class DataPipeline():
         """Update base data expiry date."""
         if pl.Path.exists((pl.Path(__file__).parent / cons.CONFIG_DIR / cons.BASE_DATA_EXP_FILE)):  # check config file
             base_data_exp = json.load(open((pl.Path(__file__).parent / cons.CONFIG_DIR / cons.BASE_DATA_EXP_FILE), mode='r'))
-            update = datetime.now(timezone.utc).isoformat()
-            base_data_exp[cons.BASE_DATA_EXP_JSON] = update
+            update_exp = datetime.now(timezone.utc).isoformat()
+            base_data_exp[cons.BASE_DATA_EXP_JSON] = update_exp
             json.dump(base_data_exp, open((pl.Path(__file__).parent / cons.CONFIG_DIR / cons.BASE_DATA_EXP_FILE), 'w'))
 
-    #TRYING TO CREATE TODO BASE_DATA_EXP with correct json structure.
     @staticmethod
     def _create_base_data_exp():
         base_data_exp = dict()
@@ -162,17 +161,17 @@ class DataPipeline():
         """Read if processed file exists, else run operations to initiate one."""
         data_frames=[]
         if pl.Path.exists(self.base_data_path) and not self._is_data_stale():
-            logger.info('loading base data file...')
+            logger.info(cons.INFO_LOAD_BASE_DATA)
             data=self.data_loader.read_file(str(self.base_data_path), 'parquet')
         else:
             for tsv in self.tsv_configs:
-                logger.info('merging tsv file(s)...')
-                data_frames.append(self.data_loader.read_file(str(tsv['path']), 'tsv', usecols=tsv['usecols']))
-                self.data_loader.delete_file(tsv['path'])
+                logger.info(cons.INFO_MERGE_TSV)
+                data_frames.append(self.data_loader.read_file(str(tsv[cons.PATH_COLUMN]), 'tsv', usecols=tsv['usecols']))
+                self.data_loader.delete_file(tsv[cons.PATH_COLUMN])
             data=self.data_loader.merge_dataframes(*data_frames, on=cons.IMDB_ID_COLUMN_LEGACY)
             self.data_loader.save_file(data, self.base_data_path)
             self._update_base_data_exp()
-        logger.info('file load complete!')
+        logger.info(cons.INFO_LOAD_DONE)
         return data
 
 class DataLoader():
@@ -318,6 +317,7 @@ class MovieFilter():
 
     @staticmethod
     def _build_numeric_condition(candidates, column_name:str, operator:str, value:str):
+        """Build quantitative filter"""
         condition = candidates[column_name]
         if operator == ">":
             return condition > value
@@ -334,7 +334,7 @@ class MovieFilter():
 
     @staticmethod
     def _build_string_condition(candidates, column_name:str, value):
-        """Helper function that checks data for broader string matches, not exact."""
+        """Helper function that checks data for broader string matches, not exact for qualitative filter"""
         condition=candidates[column_name].str.lower().str.contains(value)
         return condition
     
@@ -413,7 +413,7 @@ class AppManager():
             logger.exception(f'Unhandled exception.')
 
     def _main(self):
-        """"""
+        """Start cli and app service."""
         self.cli.start()
         self.filter_tools:list[list[str]]=self.cli.all_filter_tools
         self.movie_service.recommend(self.filter_tools)

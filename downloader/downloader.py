@@ -2,7 +2,7 @@ import json
 import requests
 import pathlib as pl
 import gzip
-from constant import constansts as cons
+from constant import constants as cons
 from tqdm import tqdm
 import logging
 

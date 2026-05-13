@@ -1,7 +1,7 @@
 import pandas as pd
 import pathlib as pl
 import json
-from constant import constansts as cons
+from constant import constants as cons
 
 class StateStore():
     """Class that handles file operations for orchestrator class for caching."""

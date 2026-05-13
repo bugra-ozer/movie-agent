@@ -2,7 +2,7 @@ import datetime
 import pandas as pd
 import logging
 from persister import state_store
-from constant import constansts as cons
+from constant import constants as cons
 
 logger=logging.getLogger(__name__)
 

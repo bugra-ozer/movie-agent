@@ -1,4 +1,4 @@
-#Pandas cons
+#Pandas operation constants
 IMDB_ID_COLUMN = 'IMDBid'
 IMDB_ID_COLUMN_LEGACY = 'tconst'
 GENRE_COLUMN = 'Genre'
@@ -13,6 +13,7 @@ PRIMARY_TITLE_COLUMN = 'Primary Title'
 PRIMARY_TITLE_COLUMN_LEGACY = 'primaryTitle'
 AVERAGE_RATING_COLUMN = 'Average Rating'
 BAYES_SCORE_COLUMN = 'Bay Score'
+PATH_COLUMN='path'
 DECAY_FACTOR_COLUMN = 'Decay Factor'
 ADJUSTED_SCORE_COLUMN = 'Adjusted Score'
 DATE_COLUMN = 'Date'
@@ -22,6 +23,18 @@ COLUMN_RENAME_DICT={'tconst': 'IMDBid','averageRating': 'Average Rating',
                                     'numVotes': 'Number of Votes','titleType': 'Title Type',
                                     'primaryTitle': 'Primary Title','originalTitle': 'Original Title','isAdult': 'Is Adult',
                                     'startYear': 'Published','endYear': 'End Year','runtimeMinutes': 'Run Time Minutes','genres': 'Genre'}
+
+#Pandas errors
+ERROR_APPLY_CON='Failed to apply condition to the file.'
+ERROR_LOAD_BASE_DATA='Failed to load base data'
+ERROR_LOAD_TSV_PATH='Failed to load tsv paths'
+
+#CLI
+INFO_PRESS_ANY='Press any key to continue...'
+INFO_LOAD_BASE_DATA='loading base data file...'
+INFO_MERGE_TSV='merging tsv file(s)...'
+INFO_LOAD_DONE='load complete!'
+
 #Config cons
 PREVIOUS_DATA_KEY = 'previous_data'
 BAYESIAN_DATA_KEY = 'bayesian_data'

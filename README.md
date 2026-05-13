@@ -1,5 +1,6 @@
 ![Lumen](asset/lumen_logo.svg)
 > A Python-powered movie recommendation engine with a Bayesian scoring algorithm, REST API, and JWT authentication.
+> 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-REST%20API-000000?style=flat&logo=flask)
 ![JWT](https://img.shields.io/badge/Auth-JWT-000000?style=flat&logo=jsonwebtokens)
@@ -105,7 +106,7 @@ Where `v` = vote count, `m` = minimum votes threshold, `R` = movie average, `C` 
 ## Folder Structure
 
 ```
-Container/
+lumen/
 ├── main.py               ← Core classes (Container, MovieService, AppManager...)
 ├── scorer/
 │   └── bayesian_algorithm.py
@@ -130,7 +131,7 @@ Container/
 
 ```bash
 # Clone the repo
-git clone https://github.com/bugra-ozer/movie-agent
+git clone https://github.com/bugra-ozer/lumen
 cd lumen
 
 # Install dependencies
