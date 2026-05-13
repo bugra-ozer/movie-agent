@@ -106,7 +106,7 @@ Where `v` = vote count, `m` = minimum votes threshold, `R` = movie average, `C` 
 ## Folder Structure
 
 ```
-Container/
+lumen/
 ├── main.py               ← Core classes (Container, MovieService, AppManager...)
 ├── scorer/
 │   └── bayesian_algorithm.py
