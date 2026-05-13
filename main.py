@@ -152,9 +152,10 @@ class DataPipeline():
 
     @staticmethod
     def _create_base_data_exp():
+        """Case handling when exp file is corrupted, deleted or missing; write expiry date for consistency."""
         base_data_exp = dict()
-        a_year_ago = (datetime.now(timezone.utc) - timedelta(weeks=5)).isoformat()
-        base_data_exp[cons.BASE_DATA_EXP_JSON] = a_year_ago
+        update_exp = datetime.now(timezone.utc).isoformat()
+        base_data_exp[cons.BASE_DATA_EXP_JSON] = update_exp
         json.dump(base_data_exp, open((pl.Path(__file__).parent / cons.CONFIG_DIR / cons.BASE_DATA_EXP_FILE), 'w'))
 
     def build_data(self):
