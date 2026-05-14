@@ -1,0 +1,13 @@
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'checkout code'
+        uses: actions/checkout@v3
+      - name: 'checkout req'
+        run: 'pip install -r requirements.txt'
+      - name: 'checkout dev-req'
+        run: 'pip install -r requirements-dev.txt'
+      - name: 'run tests'
+        run: 'python -m pytest ./test/'
