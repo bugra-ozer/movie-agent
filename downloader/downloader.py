@@ -41,7 +41,7 @@ class DatasetDownloader():
     def _decompress_file(self, source, destination):
         """Decompress .gz files, clean up and save to destination."""
         if source.exists():
-            comp_size = pl.Path(source).stat().st_size  # in bytes
+            comp_size = source.stat().st_size  # in bytes
             previous = 0
             bar:tqdm=tqdm(total=comp_size, unit='B', unit_scale=True, bar_format='\033[37m{l_bar}\033[32m{bar}\033[37m{r_bar}', ncols=120, desc=f'decompressing dataset {self.file}') #1 MB packets
             with gzip.open(source, "rb") as f_in, open(destination, "wb") as f_out:
@@ -53,10 +53,10 @@ class DatasetDownloader():
             self._delete_file(source) #delete compressed file (.tsv.gz)
         else:raise Exception(f'Decompression failed. {source} not found.')
 
-    def _delete_file(self, source):
+    def _delete_file(self, source:pl.Path):
         """Delete file"""
         if source.exists():
-            pl.Path(source).unlink()
+            source.unlink()
         return self
 
     def fetch_imdb_dataset(self, requests_config: dict):

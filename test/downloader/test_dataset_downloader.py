@@ -1,4 +1,6 @@
 import io
+from unittest.mock import MagicMock
+
 import pytest
 from constant import constants_dev as cons_dev
 from unittest import mock
@@ -24,13 +26,18 @@ def test_download_write_chunks_b(mock_get, mock_open):
 
 @patch('downloader.downloader.open')
 @patch('downloader.downloader.gzip.open')
-@patch('downloader.downloader.exists')
-def test_decompress_downloaded(mock_exists, mock_gzip, mock_open):
+def test_decompress_downloaded(mock_gzip, mock_open):
     unit = downloader.DatasetDownloader()
-    mock_exists.return_value = True
-    compressed_data = io.BytesIO(b'compressed')
+    mock_source = MagicMock()
+    mock_dest = MagicMock()
+    mock_dest.exists.return_value = True
+    mock_source.exists.return_value = True
+    mock_source.stat.return_value.st_size = 100
+    compressed_data = MagicMock()
+    compressed_data.read.side_effect = [b'compressed', b'']
+    compressed_data.fileobj.tell.return_value=4
     mock_gzip.return_value.__enter__.return_value=compressed_data
     dest_file = io.BytesIO()
     mock_open.return_value.__enter__.return_value = dest_file
-    unit._decompress_file(cons_dev.mock_url,cons_dev.mock_fake_path)
-    assert dest_file == b'compressed'
+    unit._decompress_file(mock_source,mock_dest)
+    assert dest_file.getvalue() == b'compressed'
