@@ -22,3 +22,15 @@ def test_download_write_chunks_b(mock_get, mock_open):
     unit._download_file(url, mock_file)
     assert mock_file.getvalue() == b''.join(mock_response.iter_content.return_value)
 
+@patch('downloader.downloader.open')
+@patch('downloader.downloader.gzip.open')
+@patch('downloader.downloader.exists')
+def test_decompress_downloaded(mock_exists, mock_gzip, mock_open):
+    unit = downloader.DatasetDownloader()
+    mock_exists.return_value = True
+    compressed_data = io.BytesIO(b'compressed')
+    mock_gzip.return_value.__enter__.return_value=compressed_data
+    dest_file = io.BytesIO()
+    mock_open.return_value.__enter__.return_value = dest_file
+    unit._decompress_file(cons_dev.mock_url,cons_dev.mock_fake_path)
+    assert dest_file == b'compressed'
