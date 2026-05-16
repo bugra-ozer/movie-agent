@@ -187,6 +187,7 @@ class DataLoader():
         """Merge pandas Dataframe objects.
 
         Args:
+            *args: pandas Dataframe objects
             on: specific column to merge on"""
         if on is None:
             raise ValueError('on is required')
@@ -202,7 +203,7 @@ class DataLoader():
 
         Args:
             path: read from
-            file_type: tsv or csv
+            file_type: parquet, tsv or csv
             usecols: columns to retain, configured in .json"""
         path = pl.Path(path)
         if file_type.strip().lower() == 'tsv':
@@ -233,7 +234,7 @@ class DataLoader():
             pl.Path(path).unlink()
         return self
 
-class MovieFilter():
+class DataFilter():
     """Class that internally selects and stores selected movies after user filter is applied.\n
     Carries Container dataframe and Dataframe internally"""
 
@@ -351,7 +352,7 @@ class MovieFilter():
             sorted_candidates=candidates
         return sorted_candidates
 
-class MovieService():
+class AppService():
     """Movie recommendation service that runs end to end."""
 
     def __init__(self):
@@ -370,7 +371,7 @@ class MovieService():
         :param filter_tools:
         :return: list of picked movies
         """
-        candidates = MovieFilter(self.data, filter_tools).result
+        candidates = DataFilter(self.data, filter_tools).result
         self.picks=self._pick_top(candidates, cons.M_POOL, cons.N_POP)
         self.state_store.concat_file({cons.PREVIOUS_DATA_KEY: pd.DataFrame(self.picks[[cons.IMDB_ID_COLUMN, cons.DATE_COLUMN]])})
         self.state_store.save_all_files()
@@ -406,7 +407,7 @@ class AppManager():
     
     def __init__(self):
         try:
-            self.movie_service=MovieService()
+            self.movie_service=AppService()
             self.cli=ui.UserInterface()
             self._main()
         except Exception as e: # noqa

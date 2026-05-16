@@ -1,6 +1,6 @@
 from os import access
 from flask import request, Flask, jsonify
-from main import MovieService
+from main import AppService
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import datetime, timezone, timedelta
@@ -14,7 +14,7 @@ os.chdir(Path(__file__).parent.parent)
 load_dotenv()
 secret_key=os.environ.get("SECRET_KEY")
 app=Flask(__name__)
-app_service=MovieService()
+app_service=AppService()
 USERS={"admin": b'$2b$12$Gy9z3lihHck5fCP4dAJMB.JzryhwuExZgHJ49GgynNW5t88hEuOLa', "robert55": b'$2b$12$AnnHZBLv63cVShZhl2OMjuUJX5fYKX4e23/LB8iWTV7aJzAHj5bxG'} # noqa
 REF_TOKENS={}
 PUBLIC_PATHS=cons.PUBLIC_PATHS

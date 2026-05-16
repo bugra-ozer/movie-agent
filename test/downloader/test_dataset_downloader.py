@@ -16,8 +16,8 @@ def test_download_write_chunks_b(mock_get, mock_open):
     url = cons_dev.mock_url #constant
     mock_response=MagicMock()
     mock_response.status_code=200
-    mock_response.headers=cons_dev.mock_content_length
-    mock_response.iter_content.return_value=cons_dev.mock_data_response_bytes
+    mock_response.headers=cons_dev.mock_content_length #size of file
+    mock_response.iter_content.return_value=cons_dev.mock_data_response_bytes #mock bytes equal to size of file
     mock_get.return_value=mock_response
     mock_open.return_value.__enter__.return_value=mock_file
     unit._download_file(url, mock_file)
@@ -41,3 +41,4 @@ def test_decompress_downloaded(mock_gzip, mock_open):
     mock_open.return_value.__enter__.return_value = dest_file
     unit._decompress_file(mock_source,mock_dest)
     assert dest_file.getvalue() == b'compressed'
+
