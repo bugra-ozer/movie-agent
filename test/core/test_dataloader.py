@@ -27,3 +27,11 @@ def test_read_csv(mock_tsv, usecols=None):
     mock_tsv.assert_called_once_with(path, delimiter='\t', encoding='latin-1', on_bad_lines='skip', na_values='\\N', usecols=usecols)
     assert isinstance(read,pd.DataFrame)
 
+@patch('main.pd.DataFrame.to_parquet')
+def test_to_parquet(mock_to_parquet):
+    unit = DataLoader()
+    mock_to_parquet.return_value = None
+    path=cons_dev.mock_path #raw string
+    write=unit.save_file(pd.DataFrame(),path)
+    mock_to_parquet.assert_called_once_with(path)
+    assert isinstance(write,DataLoader)
