@@ -176,7 +176,7 @@ class DataPipeline():
         return data
 
 class DataLoader():
-    """Pandas dataframe operations class without any business knowledge"""
+    """Pandas Dataframe and file I/O operations class without business knowledge"""
 
     def __init__(self, usecols=None):
         self.data=None
@@ -235,8 +235,7 @@ class DataLoader():
         return self
 
 class DataFilter():
-    """Class that internally selects and stores selected movies after user filter is applied.\n
-    Carries Container dataframe and Dataframe internally"""
+    """Internally selects and stores selected movies after user filter is applied."""
 
     def __init__(self, df:pd.DataFrame, filter_tools:list[list[str]], sort_column=cons.ADJUSTED_SCORE_COLUMN):
         """Requires Dataframe object to initialize
@@ -249,10 +248,9 @@ class DataFilter():
         self.result=self.get_movies(self.filter_tools, sort_column=sort_column)
 
     def get_movies(self, filter_tools:list[list[str]], sort_column=cons.ADJUSTED_SCORE_COLUMN):
-        """Retrieve list of movies with user filter applied.\n
+        """Retrieve list of movies with user filter applied.
         filter_tools: Filter params: column_name, operator, value such as: Average Rating, >, 7
         """
-        #Check if column_name, operatr, value valid in dataframe
         candidates=self.apply_each_filter(filter_tools)
         self.configure_sort(sort_column, False)
         result=self.sort_candidates(candidates)
@@ -305,7 +303,7 @@ class DataFilter():
         return new_value
 
     def _build_filter(self, candidates, column_name:str, operator:str, value:str):
-        """Build pandas condition based on column, operator, and value\n"""
+        """Build pandas condition based on column, operator, and value"""
         if pd.api.types.is_numeric_dtype(candidates[column_name]):
             try:
                 condition=self._apply_numeric_filter(candidates, column_name, operator, value)
@@ -368,7 +366,7 @@ class AppService():
 
     def recommend(self, filter_tools:list[list[str]]):
         """
-        :param filter_tools:
+        :param filter_tools: nested list of filters or empty list(s)
         :return: list of picked movies
         """
         candidates = DataFilter(self.data, filter_tools).result
@@ -380,10 +378,12 @@ class AppService():
 
     def _pick_top(self, pool:pd.DataFrame, m:int, n:int):
         """
-        :param pool: Main subpool of movies
-        :param m: subpool from pool
-        :param n: amount of movies picked at random from subpool m
-        :return: Pandas.DataFrame
+        Args:
+            pool: Main subpool of movies
+            m: subpool from pool
+            n: amount of movies picked at random from subpool m
+        Returns:
+             DataFrame
         """
         if n > m > 0 >= n:
             return ValueError('Pool can not be larger than population.')
@@ -400,10 +400,7 @@ class AppService():
         return import_data
 
 class AppManager():
-    """Main orchestrator that assembles prereq for service.
-    TODO:
-        -cli and api decision lives and decided at this level.
-        -service does not care of cli and api difference."""
+    """Main orchestrator that assembles prereq for service."""
     
     def __init__(self):
         try:
