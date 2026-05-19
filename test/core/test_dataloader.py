@@ -35,3 +35,12 @@ def test_to_parquet(mock_to_parquet):
     write=unit.save_file(pd.DataFrame(),path)
     mock_to_parquet.assert_called_once_with(path)
     assert isinstance(write,DataLoader)
+
+def test_merge():
+    merge_to=pd.DataFrame([cons_dev.dummy_dataframe_data[0]], columns=cons_dev.dummy_dataframe_columns_one)
+    merge_from=pd.DataFrame([cons_dev.dummy_dataframe_data[1]], columns=cons_dev.dummy_dataframe_columns_two)
+    merge=merge_to.merge(merge_from, on=cons_dev.dummy_dataframe_columns_one[0])
+    all_columns=set()
+    all_columns.update(merge_to.columns, merge_from.columns)
+    for column in all_columns:
+        assert column in list(merge)
